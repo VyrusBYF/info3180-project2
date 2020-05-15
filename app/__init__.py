@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
 # Config Values
 USERNAME = 'admin'
@@ -10,5 +11,11 @@ SECRET_KEY = 'Sup3r$3cretkey'
 UPLOAD_FOLDER =  './app/static/uploads'
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = "change this to be a more random key"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://project2:info3180@localhost/project2" #"postgresql://user:password@localhost/database" 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True # added just to suppress a warning
+
+db = SQLAlchemy(app)
+
 app.config.from_object(__name__)
 from app import views
