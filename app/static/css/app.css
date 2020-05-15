@@ -1,0 +1,16 @@
+body {
+    padding-top: 5rem;
+}
+
+.grid{
+	display:grid;
+	grid-auto-flow: row;
+	grid-template-columns: 33% 33% 33%
+	width:100%;
+}
+
+.image{
+	width: 30%;
+	height: 260px;
+	margin-bottom: 30px;
+}
