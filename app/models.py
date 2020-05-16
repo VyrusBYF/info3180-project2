@@ -1,3 +1,13 @@
+# pylint: disable=W0312
+# pylint: disable=C0111
+# pylint: disable=W0611
+# pylint: disable=C0303 
+# pylint: disable=E1101
+# pylint: disable=C0103
+# pylint: disable=C0301
+# pylint: disable=C0326
+# pylint: disable=R0903
+
 from . import db
 from werkzeug.security import generate_password_hash
 
@@ -50,7 +60,7 @@ class Users(db.Model):
 class Posts (db.Model):
     __tablename__ = 'posts'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)
     photo = db.Column(db.String(300))
     caption = db.Column(db.String(500))
@@ -60,7 +70,7 @@ class Posts (db.Model):
 class Likes (db.Model):
     __tablename__ = 'likes'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)
     post_id = db.Column(db.Integer)
 
@@ -69,6 +79,6 @@ class Likes (db.Model):
 class Follows (db.Model):
     __tablename__ = 'follows'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)

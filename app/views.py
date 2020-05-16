@@ -1,3 +1,19 @@
+# pylint: disable=W0312
+# pylint: disable=C0111
+# pylint: disable=W0611
+# pylint: disable=C0303 
+# pylint: disable=E1101
+# pylint: disable=C0103
+# pylint: disable=C0301
+# pylint: disable=C0326
+# pylint: disable=R0903
+# pylint: disable=R0912
+# pylint: disable=C0411
+# pylint: disable=C0412
+# pylint: disable=C0121
+
+
+
 """
 Flask Documentation:     http://flask.pocoo.org/docs/
 Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
@@ -6,26 +22,105 @@ This file creates your application.
 """
 import os
 from app import app,db
-from app.forms import UploadForm
+from app.forms import PostForm, RegistrationForm
 from flask import render_template, request, redirect, url_for, flash, session, abort
 from werkzeug.utils import secure_filename
-
+from datetime import date
 from app.models import Users, Posts, Likes, Follows
+from werkzeug.security import generate_password_hash, check_password_hash
 
-###
-# Routing for your application.
-###
 
-@app.route('/')
-def home():
-    """Render website's home page."""
-    return render_template('home.html')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
+    """
+    Because we use HTML5 history mode in vue-router we need to configure our
+    web server to redirect all routes to index.html. Hence the additional route
+    "/<path:path".
 
+    Also we will render the initial webpage and then let VueJS take control.
+    """
+    return render_template('index.html')
 
 @app.route('/about/')
 def about():
     """Render the website's about page."""
     return render_template('about.html', name="Mary Jane")
+
+
+
+
+@app.route('/api/users/register', methods=['POST'])
+def register():
+    form = RegistrationForm()
+    if request.method == 'POST':
+        usrname = form.username.data
+        password = generate_password_hash(form.password.data)
+        fname = form.firstname.data
+        lname = form.lastname.data
+        email = form.email.data
+        location = form.location.data
+        bio = form.biography.data
+        join_date = date.today().strftime("%B %Y")
+
+        file = form.photo.data
+
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flash('You have registered successfully!', 'success')
+
+        db.session.add(Users(username=usrname, password=password, first_name=fname, last_name=lname, email=email, location=location, biography=bio, pro_pic=filename, date_joined=join_date))
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('register.html',form = form)
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != app.config['USERNAME'] or request.form['password'] != app.config['PASSWORD']:
+            error = 'Invalid username or password'
+        else:
+            session['logged_in'] = True   
+            flash('You were logged in', 'success')
+            return redirect(url_for('upload'))
+    return render_template('login.html', error=error)
+
+@app.route('/api/auth/logout', methods=['GET'])
+def logout():
+    session.pop('logged_in', None)
+    flash('You were logged out', 'success')
+    return redirect(url_for('index'))
+
+@app.route('/api/users/{user_id}/posts', methods=['GET','POST'])
+def userPosts():
+    return 0
+
+@app.route('/api/users/{user_id}/follow', methods=['POST'])
+def follow():
+    return 0
+
+@app.route('/api/posts', methods=['GET'])
+def posts():
+    return 0
+
+
+@app.route('/api/posts/{post_id}/like', methods=['POST'])
+def like():
+    return 0
+
+
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+"""
 
 
 @app.route('/upload', methods=['POST', 'GET'])
@@ -58,7 +153,7 @@ def get_uploaded_images():
     for subdir, dirs, files in os.walk(rootdir + '/app/static/uploads'):
         for file in files:
             lst.append(file)
-        """print os.path.join(subdir, file)"""
+        print os.path.join(subdir, file)
     return lst[1:] #The first file is the gitkeep, so we skip it.
 
 
@@ -105,10 +200,10 @@ def flash_errors(form):
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):
-    """Send your static text file."""
+    #Send your static text file.
     file_dot_text = file_name + '.txt'
     return app.send_static_file(file_dot_text)
-
+"""
 
 @app.after_request
 def add_header(response):
