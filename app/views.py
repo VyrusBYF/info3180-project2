@@ -22,7 +22,7 @@ This file creates your application.
 """
 import os
 from app import app,db
-from app.forms import PostForm, RegistrationForm
+from app.forms import PostForm, RegistrationForm, LoginForm
 from flask import render_template, request, redirect, url_for, flash, session, abort
 from werkzeug.utils import secure_filename
 from datetime import date
@@ -55,7 +55,8 @@ def register():
     form = RegistrationForm()
     if request.method == 'POST':
         usrname = form.username.data
-        password = generate_password_hash(form.password.data)
+        password = form.password.data
+        hashpassword = generate_password_hash(password)
         fname = form.firstname.data
         lname = form.lastname.data
         email = form.email.data
@@ -68,8 +69,11 @@ def register():
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         flash('You have registered successfully!', 'success')
-
-        db.session.add(Users(username=usrname, password=password, first_name=fname, last_name=lname, email=email, location=location, biography=bio, pro_pic=filename, date_joined=join_date))
+        print(password)
+        print(hashpassword)
+        print(check_password_hash(hashpassword,password))
+        print(hashpassword)
+        db.session.add(Users(username=usrname, password=hashpassword, first_name=fname, last_name=lname, email=email, location=location, biography=bio, pro_pic=filename, date_joined=join_date))
         db.session.commit()
         return redirect(url_for('index'))
     return render_template('register.html',form = form)
@@ -77,13 +81,22 @@ def register():
 @app.route('/api/auth/login', methods=['POST'])
 def login():
     error = None
+    login = LoginForm()
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME'] or request.form['password'] != app.config['PASSWORD']:
+        usrname = login.username.data
+        passwrd = login.password.data
+        usr=Users.query.filter_by(username=usrname).first()
+        if usr == None :
             error = 'Invalid username or password'
+            print (error)
         else:
-            session['logged_in'] = True   
-            flash('You were logged in', 'success')
-            return redirect(url_for('upload'))
+            if check_password_hash(usr.password,passwrd) == True:
+                print ("Logged IN")
+
+                session['logged_in'] = True   
+                flash('You were logged in', 'success')
+                return redirect(url_for('posts'))
+
     return render_template('login.html', error=error)
 
 @app.route('/api/auth/logout', methods=['GET'])
@@ -94,6 +107,25 @@ def logout():
 
 @app.route('/api/users/{user_id}/posts', methods=['GET','POST'])
 def userPosts():
+     form = RegistrationForm()
+    if request.method == 'POST':
+
+        caption = form.biography.data
+        created_on = date.today().strftime("%d %b, %Y")
+        user_id = user_id
+        file = form.photo.data
+
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flash('You have registered successfully!', 'success')
+        print(password)
+        print(hashpassword)
+        print(check_password_hash(hashpassword,password))
+        print(hashpassword)
+        db.session.add(Users(user_id = user_id, photo = filename, caption = caption, created_on = created_on))
+        db.session.commit()
+        return redirect(url_for('index'))
+    
     return 0
 
 @app.route('/api/users/{user_id}/follow', methods=['POST'])

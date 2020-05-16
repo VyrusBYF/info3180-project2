@@ -33,7 +33,7 @@ class Users(db.Model):
         self.first_name = first_name
         self.last_name = last_name
         self.username = username
-        self.password = generate_password_hash(password, method='pbkdf2:sha256')
+        self.password = password
         self.email = email
         self.location = location
         self.biography = biography

@@ -15,6 +15,9 @@ Vue.component('app-header', {
           <li class="nav-item">
             <router-link class="nav-link" to="/register">Register</router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/login">Login</router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -44,7 +47,7 @@ const Register  = Vue.component('register',{
     template:`
         <div>
             <h1>Register</h1>
-            <form id ="regForm" method = "POST" @submit.prevent="uploadProfile" enctype="multipart/form-data">
+            <form id ="regForm" method = "POST" @submit.prevent="register" enctype="multipart/form-data">
 
                 <label>Username</label><br>
                 <input name="username" type="text"><br><br>
@@ -82,7 +85,7 @@ const Register  = Vue.component('register',{
         };
     },
     methods:{
-        uploadProfile: function(){
+        register: function(){
             let regForm = document.getElementById('regForm');
             let form_data = new FormData(regForm);
 
@@ -107,11 +110,106 @@ const Register  = Vue.component('register',{
         }
     }
 });
-const Login     = Vue.component('login',{});
+const Login     = Vue.component('login',{
+    template:`
+        <div>
+            <h1>Login</h1>
+            <form id ="logForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
+
+                <label>Username</label><br>
+                <input name="username" type="text"><br><br>
+                
+                <label>Password</label><br>
+                <input name="password" type="password"><br><br>
+                
+                <button type= "submit" id="submitbtn"> Submit </button>
+            </form>
+        </div>
+    `,
+     data: function(){
+        return {
+            messages: [],
+            error: []
+        };
+    },
+    methods:{
+        login: function(){
+            let logForm = document.getElementById('logForm');
+            let form_data = new FormData(logForm);
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                body: form_data,
+                headers:{
+                    'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+                console.log(jsonResponse);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
+});
 const Logout    = Vue.component('logout',{});
 const Explore   = Vue.component('explore',{});
 const Users     = Vue.component('users',{});
-const Posts     = Vue.component('posts',{});
+const Posts     = Vue.component('posts',{
+    template:`
+        <div>
+            <h1>New Post</h1>
+            <form id ="nPostForm" method = "POST" @submit.prevent="new_post" enctype="multipart/form-data">
+
+                <label for="file">Photo</label><br>
+                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
+                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
+
+                <label for="caption">Caption</label><br>
+                <textarea name="biography" placeholder="Insert Text Here" id="bio"></textarea><br>
+
+                <button type= "submit" id="submitbtn"> Submit </button>
+            </form>
+        </div>
+    `,
+     data: function(){
+        return {
+            messages: [],
+            error: []
+        };
+    },
+    methods:{
+        new_post: function(){
+            let nPostForm = document.getElementById('nPostForm');
+            let form_data = new FormData(nPostForm);
+
+            fetch('/api/users/' + user_id + '/posts', {
+                method: 'POST',
+                body: form_data,
+                headers:{
+                    'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+                console.log(jsonResponse);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
+});
 
 
 const Home = Vue.component('home', {

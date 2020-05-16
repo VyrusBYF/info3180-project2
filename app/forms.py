@@ -10,15 +10,16 @@
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired, FileAllowed
-from wtforms import StringField, SelectField, TextAreaField, FileField, IntegerField
+from wtforms import StringField, SelectField, PasswordField, TextAreaField, FileField, IntegerField
 from wtforms.validators import InputRequired, DataRequired
 
 class PostForm(FlaskForm):
-    description = StringField('Description', validators=[DataRequired()])
+    caption = TextAreaField('Biography')
+	photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png'])])
 
 class RegistrationForm(FlaskForm):
 	username = StringField('Username', validators=[InputRequired()])
-	password = StringField('Password', validators=[InputRequired()])
+	password = PasswordField('Password', validators=[InputRequired()])
 	firstname = StringField('Firstname', validators=[InputRequired()])
 	lastname = StringField('Lastname', validators=[InputRequired()])
 	email = StringField('Email', validators=[InputRequired()])
@@ -28,5 +29,6 @@ class RegistrationForm(FlaskForm):
 	photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png'])])
 	
 
-class SearchForm(FlaskForm):
-	stud_id = IntegerField('Student ID#', validators=[InputRequired()])
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired()])
+    password = PasswordField('Password', validators=[InputRequired()])
