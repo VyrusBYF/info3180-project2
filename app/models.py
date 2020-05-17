@@ -61,7 +61,7 @@ class Posts (db.Model):
     __tablename__ = 'posts'
 
     id = db.Column(db.Integer, primary_key=True,unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
     photo = db.Column(db.String(300))
     caption = db.Column(db.String(500))
     created_on = db.Column(db.String(30))
@@ -71,7 +71,7 @@ class Likes (db.Model):
     __tablename__ = 'likes'
 
     id = db.Column(db.Integer, primary_key=True,unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
     post_id = db.Column(db.Integer)
 
 

@@ -14,7 +14,7 @@ from wtforms import StringField, SelectField, PasswordField, TextAreaField, File
 from wtforms.validators import InputRequired, DataRequired
 
 class PostForm(FlaskForm):
-	caption = TextAreaField('Biography')
+	caption = TextAreaField('Caption')
 	photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png'])])
 
 class RegistrationForm(FlaskForm):

@@ -20,14 +20,51 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-import os
+import os, json, jwt
 from app import app,db
 from app.forms import PostForm, RegistrationForm, LoginForm
-from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask import render_template, request, redirect, url_for, flash, session, abort, jsonify, g
 from werkzeug.utils import secure_filename
 from datetime import date
 from app.models import Users, Posts, Likes, Follows
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+
+def requires_auth(f):
+  @wraps(f)
+  def decorated(*args, **kwargs):
+    auth = request.headers.get('Authorization', None)
+    if not auth:
+      return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
+
+    parts = auth.split()
+
+    if parts[0].lower() != 'bearer':
+      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
+    elif len(parts) == 1:
+      return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
+    elif len(parts) > 2:
+      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
+
+    token = parts[1]
+    try:
+         payload = jwt.decode(token, 'secret')
+
+    except jwt.ExpiredSignature:
+        return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
+    except jwt.DecodeError:
+        return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
+    print("HEllo")  
+    g.current_user = user = payload
+    return f(*args, **kwargs)
+
+  return decorated 
+
+
+
+
+
+
 
 
 @app.route('/', defaults={'path': ''})
@@ -69,13 +106,20 @@ def register():
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         flash('You have registered successfully!', 'success')
-        print(password)
-        print(hashpassword)
-        print(check_password_hash(hashpassword,password))
-        print(hashpassword)
+        #print(password)
+        #print(hashpassword)
+        #print(check_password_hash(hashpassword,password))
+        #print(hashpassword)
         db.session.add(Users(username=usrname, password=hashpassword, first_name=fname, last_name=lname, email=email, location=location, biography=bio, pro_pic=filename, date_joined=join_date))
         db.session.commit()
-        return redirect(url_for('index'))
+
+        userid = Users.query.with_entities(Users.id).filter_by(username=usrname).first()
+        #print(userid[0])
+        success_msg= usrname + "registered successfully"
+        js_msg = {"message":success_msg, "Username": usrname, "user_id": userid[0], "status":"logged_in"}
+        message = jsonify(js_msg)
+        #print(message)
+        return message
     return render_template('register.html',form = form)
 
 @app.route('/api/auth/login', methods=['POST'])
@@ -91,12 +135,11 @@ def login():
             print (error)
         else:
             if check_password_hash(usr.password,passwrd) == True:
-                print ("Logged IN")
-
-                session['logged_in'] = True   
-                flash('You were logged in', 'success')
-                return redirect(url_for('posts'))
-
+                success_msg= usrname + " logged in successfully"
+                token = jwt.encode({"user_id": usr.id}, 'secret',algorithm='HS256').decode('utf-8')
+                js_msg = {"message":success_msg, "Username": usr.username, "user_id": usr.id, "status": True ,'token': token } 
+                message = jsonify(js_msg)
+                return message
     return render_template('login.html', error=error)
 
 @app.route('/api/auth/logout', methods=['GET'])
@@ -104,40 +147,47 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out', 'success')
     return redirect(url_for('index'))
+"""
+@app.route('/api/users/<user_id>/posts', methods=['GET','POST'])
+def userPosts(user_id):
+    form = PostForm()
+"""
+@app.route('/api/users/<user_id>/posts', methods=['GET','POST'])
+@requires_auth
+def userPosts(user_id):
+    form = PostForm()
 
-@app.route('/api/users/{user_id}/posts', methods=['GET','POST'])
-def userPosts():
-    form = RegistrationForm()
     if request.method == 'POST':
 
-        caption = form.biography.data
+        caption = form.caption.data
         created_on = date.today().strftime("%d %b, %Y")
-        user_id = user_id
         file = form.photo.data
+        print(user_id);
 
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         flash('You have registered successfully!', 'success')
-        print(password)
-        print(hashpassword)
-        print(check_password_hash(hashpassword,password))
-        print(hashpassword)
-        db.session.add(Users(user_id = user_id, photo = filename, caption = caption, created_on = created_on))
+        db.session.add(Posts(user_id = user_id, photo = filename, caption = caption, created_on = created_on))
         db.session.commit()
         return redirect(url_for('index'))
-    
+    if request.method == 'GET':
+        posts = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
+        print (posts)    
     return 0
 
-@app.route('/api/users/{user_id}/follow', methods=['POST'])
+@app.route('/api/users/<user_id>/follow', methods=['POST'])
+@requires_auth
 def follow():
     return 0
 
 @app.route('/api/posts', methods=['GET'])
+@requires_auth
 def posts():
     return 0
 
 
 @app.route('/api/posts/{post_id}/like', methods=['POST'])
+@requires_auth
 def like():
     return 0
 
