@@ -119,7 +119,9 @@ const Register  = Vue.component('register',{
                 if(auth_status == true){
                     user_id = jsonResponse.user_id;
                     console.log(user_id);
+
                 }
+                router.push({ name: "login"})
             })
             .catch(function (error) {
                 console.log(error);
@@ -430,7 +432,7 @@ const router = new VueRouter({
         {path: "/", component: Home},
         // Put other routes here
         {path: "/register", component: Register},
-        {path: "/login", component: Login},
+        {path: "/login", component: Login , name: "login" },
         {path: "/logout", component: Logout},
         {path: "/explore", component: Explore},
         {path: '/users/{user_id}', component: Users, name:'user'},
