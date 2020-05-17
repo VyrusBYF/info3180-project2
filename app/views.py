@@ -143,10 +143,10 @@ def login():
     return render_template('login.html', error=error)
 
 @app.route('/api/auth/logout', methods=['GET'])
+@requires_auth
 def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out', 'success')
-    return redirect(url_for('index'))
+    success_msg=" logged out successfully"
+    return jsonify(success_msg)
 """
 @app.route('/api/users/<user_id>/posts', methods=['GET','POST'])
 def userPosts(user_id):
@@ -170,7 +170,8 @@ def userPosts(user_id):
         db.session.add(Posts(user_id = user_id, photo = filename, caption = caption, created_on = created_on))
         db.session.commit()
         return redirect(url_for('index'))
-    if request.method == 'GET':
+
+    elif request.method == 'GET':
         posts = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
         print (posts)    
     return 0

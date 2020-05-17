@@ -25,6 +25,9 @@ Vue.component('app-header', {
           <li>
             <router-link class="nav-link" to="/users/${user_id}">My Posts</router-link>
           </li>
+          <li>
+            <router-link class="nav-link" to="/logout">Log Out</router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -128,7 +131,7 @@ const Login     = Vue.component('login',{
     template:`
         <div>
             <h1>Login</h1>
-            <form id ="logForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
+            <form id ="logIForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
 
                 <label>Username</label><br>
                 <input name="username" type="text"><br><br>
@@ -150,8 +153,8 @@ const Login     = Vue.component('login',{
     },
     methods:{
         login: function(){
-            let logForm = document.getElementById('logForm');
-            let form_data = new FormData(logForm);
+            let logIForm = document.getElementById('logIForm');
+            let form_data = new FormData(logIForm);
 
             fetch('/api/auth/login', {
                 method: 'POST',
@@ -188,7 +191,57 @@ const Login     = Vue.component('login',{
 });
 
 
-const Logout    = Vue.component('logout',{});
+const Logout    = Vue.component('logout',{
+    template:`
+        <div>
+            <h1>Do You Want To Log Out?</h1> 
+            <form id ="logOForm"  @submit.prevent="logout">
+                <button type= "submit" id="submitbtn"> Log Out </button>
+            </form>         
+        </div>
+
+    `,
+    created:function(){
+        let self = this;
+        if(localStorage.getItem('token')!==null){
+            self.usertoken=localStorage.getItem('token');   
+        }
+    },
+    data: function(){
+        return {
+            messages: [],
+            error: []
+        };
+    },
+    methods:{
+        logout: function(){
+            let logOForm = document.getElementById('logOForm');
+            let form_data = new FormData(logOForm);
+            fetch('/api/auth/logout', {
+                method: 'GET',
+                headers:{
+                    'X-CSRFToken': token,
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+
+                },
+            credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+                console.log(jsonResponse);
+                localStorage.removeItem('token');
+                console.log('Token removed from localStorage.');
+                alert('Token removed!');
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
+});
 const Explore   = Vue.component('explore',{});
 const Users     = Vue.component('users',{
     template:`
