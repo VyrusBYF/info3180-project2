@@ -111,9 +111,15 @@ def logout():
     flash('You were logged out', 'success')
     return redirect(url_for('index'))
 
+<<<<<<< HEAD
 @app.route('/api/users/<user_id>/posts', methods=['GET','POST'])
 def userPosts(user_id):
     form = PostForm()
+=======
+@app.route('/api/users/{user_id}/posts', methods=['GET','POST'])
+def userPosts():
+    form = RegistrationForm()
+>>>>>>> 406be8bb616904a622c1a2e1cf380496cc5d57cf
     if request.method == 'POST':
 
         caption = form.caption.data

@@ -4,6 +4,12 @@
 
 <div id="app">
     <app-header></app-header>
+<<<<<<< HEAD
+=======
+    {% if current_user.is_authenticated %}
+        Hi {{ current_user.username }}!
+    {% endif %}
+>>>>>>> 406be8bb616904a622c1a2e1cf380496cc5d57cf
     <main>
         <div class="container">
             <!-- component matched by the route will render here -->
