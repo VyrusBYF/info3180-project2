@@ -41,22 +41,8 @@ label{
 	margin-left: 5px;
 }
 
-#bio{
-	width: 40%;
-	height: 100px;
-}
-
 button:focus, button:active:focus, button.active:focus {
     outline: none !important;
     outline-style: none !important;
-}
-
-label{
-	text-align: left;
-}
-.form{
-	width: 40%;
-	align-content: center;
-	border: solid 0.5px black;
 }
 

@@ -1,3 +1,4 @@
+
 /* Add your Application JavaScript */
 Vue.component('app-header', {
     template: `
@@ -15,6 +16,15 @@ Vue.component('app-header', {
           <li class="nav-item">
             <router-link class="nav-link" to="/register">Register</router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/login">Login</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/posts/new">Post</router-link>
+          </li>
+          <li>
+            <router-link class="nav-link" to="/users/${user_id}">My Posts</router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -22,6 +32,8 @@ Vue.component('app-header', {
 });
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+var auth_status = null;
+var user_id = null;
 
 
 function change(){
@@ -44,37 +56,35 @@ const Register  = Vue.component('register',{
     template:`
         <div>
             <h1>Register</h1>
-            <div class = "form">
-                <form id ="regForm" method = "POST" @submit.prevent="uploadProfile" enctype="multipart/form-data">
+            <form id ="regForm" method = "POST" @submit.prevent="register" enctype="multipart/form-data">
 
-                    <label>Username</label><br>
-                    <input name="username" type="text"><br><br>
-                    
-                    <label>Password</label><br>
-                    <input name="password" type="password"><br><br>
-                    
-                    <label>First Name</label><br>
-                    <input name="firstname" type="text"><br><br>
+                <label>Username</label><br>
+                <input name="username" type="text"><br><br>
+                
+                <label>Password</label><br>
+                <input name="password" type="password"><br><br>
+                
+                <label>First Name</label><br>
+                <input name="firstname" type="text"><br><br>
 
-                    <label>Last Name</label><br>
-                    <input name="lastname" type="text"><br><br>
-                    
-                    <label>Email</label><br>
-                    <input name="email" type="email"><br><br>
-                    
-                    <label>Locaton</label><br>
-                    <input name="location" type="text"><br><br>
+                <label>Last Name</label><br>
+                <input name="lastname" type="text"><br><br>
+                
+                <label>Email</label><br>
+                <input name="email" type="email"><br><br>
+                
+                <label>Locaton</label><br>
+                <input name="location" type="text"><br><br>
 
-                    <label for="bio">Biography</label><br>
-                    <textarea name="biography" placeholder="Insert Text Here" id="bio"></textarea><br>
+                <label for="bio">Biography</label><br>
+                <textarea name="biography" placeholder="Insert Text Here" id="bio"></textarea><br>
 
-                    <label for="file">Photo</label><br>
-                    <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
-                    <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
+                <label for="file">Photo</label><br>
+                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
+                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
 
-                    <button type= "submit" id="submitbtn"> Submit </button>
-                </form>
-            </div>
+                <button type= "submit" id="submitbtn"> Submit </button>
+            </form>
         </div>
     `,
      data: function(){
@@ -84,7 +94,7 @@ const Register  = Vue.component('register',{
         };
     },
     methods:{
-        uploadProfile: function(){
+        register: function(){
             let regForm = document.getElementById('regForm');
             let form_data = new FormData(regForm);
 
@@ -102,6 +112,11 @@ const Register  = Vue.component('register',{
             .then(function (jsonResponse) {
             // display a success message
                 console.log(jsonResponse);
+                auth_status = jsonResponse.status;
+                if(auth_status == true){
+                    user_id = jsonResponse.user_id;
+                    console.log(user_id);
+                }
             })
             .catch(function (error) {
                 console.log(error);
@@ -109,11 +124,156 @@ const Register  = Vue.component('register',{
         }
     }
 });
-const Login     = Vue.component('login',{});
+const Login     = Vue.component('login',{
+    template:`
+        <div>
+            <h1>Login</h1>
+            <form id ="logForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
+
+                <label>Username</label><br>
+                <input name="username" type="text"><br><br>
+                
+                <label>Password</label><br>
+                <input name="password" type="password"><br><br>
+                
+                <button type= "submit" id="submitbtn"> Submit </button>
+            </form>
+
+        </div>
+
+    `,
+     data: function(){
+        return {
+            messages: [],
+            error: []
+        };
+    },
+    methods:{
+        login: function(){
+            let logForm = document.getElementById('logForm');
+            let form_data = new FormData(logForm);
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                body: form_data,
+                headers:{
+                    'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+                console.log(jsonResponse);
+                jsonResponse.status
+                auth_status = jsonResponse.status;
+                if(auth_status== true){
+                    user_id = jsonResponse.user_id;
+                    console.log(user_id);
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
+});
+
+
 const Logout    = Vue.component('logout',{});
 const Explore   = Vue.component('explore',{});
-const Users     = Vue.component('users',{});
-const Posts     = Vue.component('posts',{});
+const Users     = Vue.component('users',{
+    template:`
+        <div>
+            <ul>
+                <li v-for="post in posts">post.user_id<br>post.caption</li>
+            </ul>
+        </div>
+    `,
+    get_posts: function(){
+            let self = this;
+            fetch('/api/users/'.concat(user_id,'/posts'), {
+                method: 'GET',
+                body: form_data,
+                headers:{
+                    'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+                console.log(jsonResponse);
+                self.posts = jsonResponse.posts;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    },
+    data: function(){
+        return{
+            posts: []
+        };
+    },
+});
+
+const Posts     = Vue.component('posts',{
+    template:`
+        <div>
+            <h1>New Post</h1>
+            <form id ="nPostForm" method = "POST" @submit.prevent="new_post" enctype="multipart/form-data">
+
+                <label for="file">Photo</label><br>
+                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
+                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
+
+                <label for="caption">Caption</label><br>
+                <textarea name="caption" placeholder="Insert Text Here" id="bio"></textarea><br>
+
+                <button type= "submit" id="submitbtn"> Submit </button>
+            </form>
+        </div>
+    `,
+     data: function(){
+        return {
+            messages: [],
+            error: []
+        };
+    },
+    methods:{
+        new_post: function(){
+            let nPostForm = document.getElementById('nPostForm');
+            let form_data = new FormData(nPostForm);
+            console.log("current user is ", user_id)
+            if (user_id != null){
+                fetch('/api/users/'.concat(user_id,'/posts'), {
+                    method: 'POST',
+                    body: form_data,
+                    headers:{
+                        'X-CSRFToken': token
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (jsonResponse) {
+                // display a success message
+                    console.log(jsonResponse);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            }else{
+                console.log("There is no user logged in");
+            }
+        }
+    }
+});
 
 
 const Home = Vue.component('home', {
@@ -212,7 +372,7 @@ const router = new VueRouter({
         {path: "/login", component: Login},
         {path: "/logout", component: Logout},
         {path: "/explore", component: Explore},
-        {path: "/users/{user_id}", component: Users},
+        {path: '/users/{user_id}', component: Users, name:'user'},
         {path: "/posts/new", component: Posts},
 
         // This is a catch all route in case none of the above matches

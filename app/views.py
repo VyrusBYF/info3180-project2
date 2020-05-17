@@ -20,10 +20,10 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-import os
+import os, json
 from app import app,db
-from app.forms import PostForm, RegistrationForm
-from flask import render_template, request, redirect, url_for, flash, session, abort
+from app.forms import PostForm, RegistrationForm, LoginForm
+from flask import render_template, request, redirect, url_for, flash, session, abort, jsonify
 from werkzeug.utils import secure_filename
 from datetime import date
 from app.models import Users, Posts, Likes, Follows
@@ -55,7 +55,8 @@ def register():
     form = RegistrationForm()
     if request.method == 'POST':
         usrname = form.username.data
-        password = generate_password_hash(form.password.data)
+        password = form.password.data
+        hashpassword = generate_password_hash(password)
         fname = form.firstname.data
         lname = form.lastname.data
         email = form.email.data
@@ -68,22 +69,40 @@ def register():
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         flash('You have registered successfully!', 'success')
-
-        db.session.add(Users(username=usrname, password=password, first_name=fname, last_name=lname, email=email, location=location, biography=bio, pro_pic=filename, date_joined=join_date))
+        #print(password)
+        #print(hashpassword)
+        #print(check_password_hash(hashpassword,password))
+        #print(hashpassword)
+        db.session.add(Users(username=usrname, password=hashpassword, first_name=fname, last_name=lname, email=email, location=location, biography=bio, pro_pic=filename, date_joined=join_date))
         db.session.commit()
-        return redirect(url_for('index'))
+
+        userid = Users.query.with_entities(Users.id).filter_by(username=usrname).first()
+        #print(userid[0])
+        success_msg= usrname + "registered successfully"
+        js_msg = {"message":success_msg, "Username": usrname, "user_id": userid[0], "status":"logged_in"}
+        message = jsonify(js_msg)
+        #print(message)
+        return message
     return render_template('register.html',form = form)
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
     error = None
+    login = LoginForm()
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME'] or request.form['password'] != app.config['PASSWORD']:
+        usrname = login.username.data
+        passwrd = login.password.data
+        usr=Users.query.filter_by(username=usrname).first()
+        if usr == None :
             error = 'Invalid username or password'
+            print (error)
         else:
-            session['logged_in'] = True   
-            flash('You were logged in', 'success')
-            return redirect(url_for('upload'))
+            if check_password_hash(usr.password,passwrd) == True:
+                success_msg= usrname + " logged in successfully"
+                js_msg = {"message":success_msg, "Username": usr.username, "user_id": usr.id, "status": True }
+                message = jsonify(js_msg)
+                #print(message)
+                return message
     return render_template('login.html', error=error)
 
 @app.route('/api/auth/logout', methods=['GET'])
@@ -92,11 +111,28 @@ def logout():
     flash('You were logged out', 'success')
     return redirect(url_for('index'))
 
-@app.route('/api/users/{user_id}/posts', methods=['GET','POST'])
-def userPosts():
+@app.route('/api/users/<user_id>/posts', methods=['GET','POST'])
+def userPosts(user_id):
+    form = PostForm()
+    if request.method == 'POST':
+
+        caption = form.caption.data
+        created_on = date.today().strftime("%d %b, %Y")
+        file = form.photo.data
+        print(user_id);
+
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flash('You have registered successfully!', 'success')
+        db.session.add(Posts(user_id = user_id, photo = filename, caption = caption, created_on = created_on))
+        db.session.commit()
+        return redirect(url_for('index'))
+    if request.method == 'GET':
+        posts = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
+        print (posts)    
     return 0
 
-@app.route('/api/users/{user_id}/follow', methods=['POST'])
+@app.route('/api/users/<user_id>/follow', methods=['POST'])
 def follow():
     return 0
 
