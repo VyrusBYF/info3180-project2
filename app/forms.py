@@ -14,7 +14,7 @@ from wtforms import StringField, SelectField, PasswordField, TextAreaField, File
 from wtforms.validators import InputRequired, DataRequired
 
 class PostForm(FlaskForm):
-    caption = TextAreaField('Biography')
+	caption = TextAreaField('Biography')
 	photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png'])])
 
 class RegistrationForm(FlaskForm):
@@ -24,7 +24,6 @@ class RegistrationForm(FlaskForm):
 	lastname = StringField('Lastname', validators=[InputRequired()])
 	email = StringField('Email', validators=[InputRequired()])
 	location = StringField('Location', validators=[InputRequired()])
-
 	biography = TextAreaField('Biography')
 	photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png'])])
 	

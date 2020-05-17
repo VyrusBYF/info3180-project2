@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 
 {% block main %}
+
 <div id="app">
     <app-header></app-header>
-
+    {% if current_user.is_authenticated %}
+        Hi {{ current_user.username }}!
+    {% endif %}
     <main>
         <div class="container">
             <!-- component matched by the route will render here -->

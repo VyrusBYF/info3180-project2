@@ -124,7 +124,9 @@ const Login     = Vue.component('login',{
                 
                 <button type= "submit" id="submitbtn"> Submit </button>
             </form>
+
         </div>
+
     `,
      data: function(){
         return {

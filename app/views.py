@@ -107,7 +107,7 @@ def logout():
 
 @app.route('/api/users/{user_id}/posts', methods=['GET','POST'])
 def userPosts():
-     form = RegistrationForm()
+    form = RegistrationForm()
     if request.method == 'POST':
 
         caption = form.biography.data
