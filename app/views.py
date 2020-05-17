@@ -1,16 +1,21 @@
+# pylint: disable=W0311
 # pylint: disable=W0312
 # pylint: disable=C0111
 # pylint: disable=W0611
+# pylint: disable=W0612
+# pylint: disable=W0613
 # pylint: disable=C0303 
 # pylint: disable=E1101
 # pylint: disable=C0103
 # pylint: disable=C0301
 # pylint: disable=C0326
 # pylint: disable=R0903
+# pylint: disable=R0911
 # pylint: disable=R0912
 # pylint: disable=C0411
 # pylint: disable=C0412
 # pylint: disable=C0121
+
 
 
 
@@ -31,34 +36,31 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
 def requires_auth(f):
-  @wraps(f)
-  def decorated(*args, **kwargs):
-    auth = request.headers.get('Authorization', None)
-    if not auth:
-      return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.headers.get('Authorization', None)
+        if not auth:
+            return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
 
-    parts = auth.split()
+        parts = auth.split()
 
-    if parts[0].lower() != 'bearer':
-      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
-    elif len(parts) == 1:
-      return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
-    elif len(parts) > 2:
-      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
-
-    token = parts[1]
-    try:
-         payload = jwt.decode(token, 'secret')
-
-    except jwt.ExpiredSignature:
-        return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
-    except jwt.DecodeError:
-        return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
-    print("HEllo")  
-    g.current_user = user = payload
-    return f(*args, **kwargs)
-
-  return decorated 
+        if parts[0].lower() != 'bearer':
+            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
+        elif len(parts) == 1:
+            return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
+        elif len(parts) > 2:
+            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
+        
+        token = parts[1]
+        try:
+            payload = jwt.decode(token, 'secret')
+        except jwt.ExpiredSignature:
+            return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
+        except jwt.DecodeError:
+            return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
+        g.current_user = user = payload
+        return f(*args, **kwargs)
+    return decorated 
 
 
 
@@ -162,14 +164,16 @@ def userPosts(user_id):
         caption = form.caption.data
         created_on = date.today().strftime("%d %b, %Y")
         file = form.photo.data
-        print(user_id);
+        #print(user_id);
 
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         flash('You have registered successfully!', 'success')
         db.session.add(Posts(user_id = user_id, photo = filename, caption = caption, created_on = created_on))
         db.session.commit()
-        return redirect(url_for('index'))
+
+        success_msg = str(user_id) + " You successfully uploaded your post!"
+        return jsonify(success_msg)
 
     elif request.method == 'GET':
         posts = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
@@ -178,17 +182,28 @@ def userPosts(user_id):
 
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @requires_auth
-def follow():
-    return 0
+
 
 @app.route('/api/posts', methods=['GET'])
 @requires_auth
 def posts():
-    return 0
+    posts=[]
+    results = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
+    for post in results:
+        #print (post)
+        temp={}
+        temp['user_id']=post[0]
+        temp['caption']=post[2]
+        posts.append(temp)
+    return jsonify(posts = posts) 
 
 
 @app.route('/api/posts/{post_id}/like', methods=['POST'])
 @requires_auth
+
+
+def follow():
+    return 0
 def like():
     return 0
 

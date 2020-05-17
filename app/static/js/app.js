@@ -55,6 +55,9 @@ function text(){
 
 }
 
+function explorebtn(){
+}
+
 const Register  = Vue.component('register',{
     template:`
         <div>
@@ -184,6 +187,8 @@ const Login     = Vue.component('login',{
                 localStorage.setItem('token', jwt_token);
                 console.info('Token generated and added to localStorage.');
                 self.token = jwt_token;
+
+                router.push({name: 'explore'});
             })
             .catch(function (error) {
                 console.log(error);
@@ -244,7 +249,50 @@ const Logout    = Vue.component('logout',{
         }
     }
 });
-const Explore   = Vue.component('explore',{});
+
+
+const Explore     = Vue.component('users',{
+    template:`
+        <div>
+            <form method = "GET" enctype="multipart/form-data">
+                <button id="exbtn" type="submit" hidden>Explore</button>
+            </form>
+            <ul>
+                <li v-for="post in posts">{{ post.user_id }}<br>{{ post.caption }}</li>
+            </ul>
+        </div>
+    `,
+    created:function(){
+        //var exbtn = $('exbtn');
+        //exbtn.click();
+        //console.log("I work!");
+        let self = this;
+            fetch('/api/posts',{
+                method: 'GET',
+                headers:{
+                    'X-CSRFToken': token,
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+                console.log(jsonResponse);
+                self.posts = jsonResponse.posts;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    },
+    data: function(){
+        return{
+            posts: []
+        };
+    },
+});
 const Users     = Vue.component('users',{
     template:`
         <div>
@@ -257,7 +305,6 @@ const Users     = Vue.component('users',{
             let self = this;
             fetch('/api/users/'.concat(user_id,'/posts'), {
                 method: 'GET',
-                body: form_data,
                 headers:{
                     'X-CSRFToken': token,
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -431,12 +478,12 @@ const router = new VueRouter({
     routes: [
         {path: "/", component: Home},
         // Put other routes here
-        {path: "/register", component: Register},
+        {path: "/register", component: Register, name:'register'},
         {path: "/login", component: Login , name: "login" },
-        {path: "/logout", component: Logout},
-        {path: "/explore", component: Explore},
+        {path: "/logout", component: Logout, name: 'logout'},
+        {path: "/explore", component: Explore, name: 'explore'},
         {path: '/users/{user_id}', component: Users, name:'user'},
-        {path: "/posts/new", component: Posts},
+        {path: "/posts/new", component: Posts, name:'new post'},
 
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
