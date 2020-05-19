@@ -3,7 +3,7 @@
 Vue.component('app-header', {
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="#">Lab 7</a>
+      <i class="fas fa-camera" style="margin-right:7px"></i><a class="navbar-brand title" href="#">Photogram</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -24,6 +24,9 @@ Vue.component('app-header', {
           </li>
           <li>
             <router-link class="nav-link" to="/users/${user_id}">My Posts</router-link>
+          </li>
+          <li>
+            <router-link class="nav-link" to="/explore">Explore</router-link>
           </li>
           <li>
             <router-link class="nav-link" to="/logout">Log Out</router-link>
@@ -183,7 +186,7 @@ const Login     = Vue.component('login',{
                     console.log(user_id);
                 }
                 let jwt_token = jsonResponse.token;
-                
+                console.log(localStorage);
                 localStorage.setItem('token', jwt_token);
                 console.info('Token generated and added to localStorage.');
                 self.token = jwt_token;
@@ -251,14 +254,32 @@ const Logout    = Vue.component('logout',{
 });
 
 
-const Explore     = Vue.component('users',{
+const Explore     = Vue.component('explore',{
     template:`
         <div>
             <form method = "GET" enctype="multipart/form-data">
                 <button id="exbtn" type="submit" hidden>Explore</button>
             </form>
             <ul>
-                <li v-for="post in posts">{{ post.user_id }}<br>{{ post.caption }}</li>
+                <li v-for="post in posts">
+                    <div class="post-item">
+                        <div class="grid1">
+                            <img v-bind:src="post.propic"> {{post.username}}
+                        </div>
+                        <div class="grid2">
+                             <span id="postpic"><img v-bind:src ="post.photo" alt = "Gaza" class= "image"></span>
+                        </div>
+                        <div class="grid3">
+                            {{ post.caption }}
+                        </div>
+                        <div class="grid4">
+                            <i class="far fa-heart"></i> Likes
+                        </div>
+                        <div class="grid4-2">
+                            {{ post.created }}
+                        </div>
+                    </div>
+                </li>
             </ul>
         </div>
     `,
@@ -281,7 +302,7 @@ const Explore     = Vue.component('users',{
             .then(function (jsonResponse) {
             // display a success message
                 console.log(jsonResponse);
-                self.posts = jsonResponse.posts;
+                self.posts = jsonResponse.posts; 
             })
             .catch(function (error) {
                 console.log(error);

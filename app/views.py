@@ -180,30 +180,31 @@ def userPosts(user_id):
         print (posts)    
     return 0
 
-@app.route('/api/users/<user_id>/follow', methods=['POST'])
-@requires_auth
-
-
 @app.route('/api/posts', methods=['GET'])
 @requires_auth
 def posts():
     posts=[]
-    results = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
+    results=Posts.query.with_entities(Users.username, Users.pro_pic, Posts.photo, Posts.caption, Posts.created_on).join(Users, Users.id == Posts.id).all()
+    #results = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
     for post in results:
         #print (post)
         temp={}
-        temp['user_id']=post[0]
-        temp['caption']=post[2]
+        temp['username'] = post[0]
+        temp['propic']   = "../static/uploads/" + str(post[1])
+        temp['photo']    = "../static/uploads/" + str(post[2])
+        temp['caption']  = post[3]
+        temp['created']  = post[4]
         posts.append(temp)
     return jsonify(posts = posts) 
 
-
-@app.route('/api/posts/{post_id}/like', methods=['POST'])
+@app.route('/api/users/<user_id>/follow', methods=['POST'])
 @requires_auth
-
-
 def follow():
     return 0
+
+
+@app.route('/api/posts/<post_id>/like', methods=['POST'])
+@requires_auth
 def like():
     return 0
 
