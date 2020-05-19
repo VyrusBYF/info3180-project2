@@ -14,22 +14,22 @@ Vue.component('app-header', {
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/register">Register</router-link>
+            <router-link class="nav-link" id= "R" to="/register">Register</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/login">Login</router-link>
+            <router-link class="nav-link" id= "LI" to="/login">Login</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/posts/new">Post</router-link>
+            <router-link class="nav-link" id= "P" to="/posts/new">Post</router-link>
           </li>
           <li>
-            <router-link class="nav-link" to="/users/${user_id}">My Posts</router-link>
+            <router-link class="nav-link" id= "MP" to="/users/${localStorage.getItem('user_id')}">My Posts</router-link>
           </li>
           <li>
-            <router-link class="nav-link" to="/explore">Explore</router-link>
+            <router-link class="nav-link" id= "E" to="/explore">Explore</router-link>
           </li>
           <li>
-            <router-link class="nav-link" to="/logout">Log Out</router-link>
+            <router-link class="nav-link" id= "LO" to="/logout">Log Out</router-link>
           </li>
         </ul>
       </div>
@@ -39,7 +39,27 @@ Vue.component('app-header', {
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 var auth_status = null;
-var user_id = null;
+var user_id = localStorage.getItem('user_id');
+
+function barchan(){
+	if(localStorage.getItem('token')!==null & localStorage.getItem('user_id')!==null){
+		$("#R").hide();
+		$("#LI").hide();
+		$("#P").show();
+		$("#MP").show();
+		$("#E").show();
+		$("#LO").show();
+		return true;
+	}else{
+		$("#R").show();
+		$("#LI").show();
+		$("#P").hide();
+		$("#MP").hide();
+		$("#E").hide();
+		$("#LO").hide();
+		return false;
+	}
+}
 
 
 function change(){
@@ -96,7 +116,12 @@ const Register  = Vue.component('register',{
             </form>
         </div>
     `,
-     data: function(){
+    created:function(){
+        if(barchan()!= false){
+        	router.push({name: 'home'});
+        }
+	},
+    data: function(){
         return {
             messages: [],
             error: []
@@ -153,7 +178,12 @@ const Login     = Vue.component('login',{
         </div>
 
     `,
-     data: function(){
+    created:function(){
+        if(barchan()!= false){
+        	router.push({name: 'home'});
+        }
+	},
+    data: function(){
         return {
             messages: [],
             error: []
@@ -183,6 +213,7 @@ const Login     = Vue.component('login',{
                 auth_status = jsonResponse.status;
                 if(auth_status== true){
                     user_id = jsonResponse.user_id;
+                    localStorage.setItem('user_id', user_id);
                     console.log(user_id);
                 }
                 let jwt_token = jsonResponse.token;
@@ -213,7 +244,9 @@ const Logout    = Vue.component('logout',{
     `,
     created:function(){
         let self = this;
-        if(localStorage.getItem('token')!==null){
+        if(barchan()!= true){
+        	router.push({name: 'home'});
+        }else if(localStorage.getItem('token')!==null){
             self.usertoken=localStorage.getItem('token');   
         }
     },
@@ -244,7 +277,9 @@ const Logout    = Vue.component('logout',{
                 console.log(jsonResponse);
                 localStorage.removeItem('token');
                 console.log('Token removed from localStorage.');
-                alert('Token removed!');
+                if(barchan()!= true){
+                	router.push({name: 'home'});
+                }
             })
             .catch(function (error) {
                 console.log(error);
@@ -273,7 +308,24 @@ const Explore     = Vue.component('explore',{
                             {{ post.caption }}
                         </div>
                         <div class="grid4">
-                            <i class="far fa-heart"></i> Likes
+                        	<div v-if="post.liked== 0">
+                        		<div :id = "'snotliked'+post.post_id" >
+                            		<button class="like-button" v-on:click="plikes(post.post_id,0)"><i class="far fa-heart"></i> {{ post.likes  }} Likes</button>
+                        		</div>
+                        		<div :id = "'liked'+post.post_id" style ="display: none">
+                            		<button class="like-button" v-on:click="plikes(post.post_id,0)"><i class="fas fa-heart liked"></i> {{ post.likes + 1 }} Likes</button>
+                        		</div>
+
+                        	</div>
+                        	<div v-else>
+                        	
+                        		<div :id = "'sliked'+post.post_id">
+                            		<button class="like-button" v-on:click="plikes(post.post_id,1)"><i class="fas fa-heart liked"></i> {{ post.likes }} Likes</button>
+                        		</div>
+                        		<div :id = "'notliked'+post.post_id" style ="display: none">
+                            		<button class="like-button" v-on:click="plikes(post.post_id,1)"><i class="far fa-heart"></i> {{ post.likes - 1 }} Likes</button>
+                        		</div>
+                        	</div>
                         </div>
                         <div class="grid4-2">
                             {{ post.created }}
@@ -287,11 +339,14 @@ const Explore     = Vue.component('explore',{
         //var exbtn = $('exbtn');
         //exbtn.click();
         //console.log("I work!");
+        if(barchan()!= true){
+        	router.push({name: 'home'});
+        }
         let self = this;
             fetch('/api/posts',{
                 method: 'GET',
                 headers:{
-                    'X-CSRFToken': token,
+                    
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 },
                 credentials: 'same-origin'
@@ -313,6 +368,51 @@ const Explore     = Vue.component('explore',{
             posts: []
         };
     },
+    methods:{
+    	plikes:function (post_id,liked){
+    		
+			fetch('/api/posts/'+post_id+'/like',{
+                method: 'POST',
+                headers:{
+                    'X-CSRFToken': token,
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+                console.log(jsonResponse);
+                console.log(liked)
+                console.log("#snotliked"+post_id.toString())
+                if (liked==0) {
+                	if (jsonResponse == 0) {
+                		$("#snotliked").show();
+						$("#liked"+post_id.toString()).hide();
+					}else if (jsonResponse == 1) {
+                		$("#snotliked"+post_id.toString()).hide();
+						$("#liked"+post_id.toString()).show();
+					}
+				}else if (liked==1) {
+                	if (jsonResponse == 0) {
+                		$("#notliked"+post_id.toString()).show();
+						$("#sliked"+post_id.toString()).hide();
+					}else if (jsonResponse == 1) {
+                		$("#notliked"+post_id.toString()).hide();
+						$("#sliked"+post_id.toString()).show();
+					}
+				}
+		
+                
+                self.posts = jsonResponse.posts; 
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+}
+    }
 });
 const Users     = Vue.component('users',{
     template:`
@@ -327,7 +427,7 @@ const Users     = Vue.component('users',{
             fetch('/api/users/'.concat(user_id,'/posts'), {
                 method: 'GET',
                 headers:{
-                    'X-CSRFToken': token,
+                    
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 },
                 credentials: 'same-origin'
@@ -344,6 +444,11 @@ const Users     = Vue.component('users',{
                 console.log(error);
             });
     },
+    created:function(){
+        if(barchan()!= true){
+        	router.push({name: 'home'});
+        }
+	},
     data: function(){
         return{
             posts: []
@@ -368,6 +473,11 @@ const Posts     = Vue.component('posts',{
             </form>
         </div>
     `,
+    created:function(){
+        if(barchan()!= true){
+        	router.push({name: 'home'});
+        }
+	},
      data: function(){
         return {
             messages: [],
@@ -408,14 +518,24 @@ const Posts     = Vue.component('posts',{
 
 
 const Home = Vue.component('home', {
-   template: `
+
+   	template: `
     <div class="jumbotron">
         <h1>Project 2</h1>
         <p class="lead">The project was made by 620097204 and 620096242.</p>
-    </div>
-   `,
+   	 </div>
+   	`,
     data: function() {
        return {}
+    }
+    ,
+    created:function(){
+        if(localStorage.getItem('token')!==null & localStorage.getItem('user_id')!==null){
+
+            barchan(); 
+            router.push({name: 'explore'});
+            
+        }
     }
 });
 
@@ -497,7 +617,7 @@ const NotFound = Vue.component('not-found', {
 const router = new VueRouter({
     mode: 'history',
     routes: [
-        {path: "/", component: Home},
+        {path: "/", component: Home, name:'home'},
         // Put other routes here
         {path: "/register", component: Register, name:'register'},
         {path: "/login", component: Login , name: "login" },
@@ -516,3 +636,4 @@ let app = new Vue({
     el: "#app",
     router
 });
+barchan();

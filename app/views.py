@@ -59,6 +59,7 @@ def requires_auth(f):
         except jwt.DecodeError:
             return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
         g.current_user = user = payload
+        #print(g.current_user)
         return f(*args, **kwargs)
     return decorated 
 
@@ -184,29 +185,49 @@ def userPosts(user_id):
 @requires_auth
 def posts():
     posts=[]
-    results=Posts.query.with_entities(Users.username, Users.pro_pic, Posts.photo, Posts.caption, Posts.created_on).join(Users, Users.id == Posts.id).all()
+    results=Posts.query.with_entities(Users.username, Users.pro_pic, Posts.photo, Posts.caption, Posts.created_on,Posts.id).join(Users, Users.id == Posts.user_id).all()
     #results = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
     for post in results:
-        #print (post)
-        temp={}
-        temp['username'] = post[0]
-        temp['propic']   = "../static/uploads/" + str(post[1])
-        temp['photo']    = "../static/uploads/" + str(post[2])
-        temp['caption']  = post[3]
-        temp['created']  = post[4]
-        posts.append(temp)
+       	lcount=Likes.query.filter_by(post_id=post[5]).count()
+       	liked=Likes.query.filter_by(post_id=post[5],user_id=g.current_user['user_id']).count()
+       	#print (lcount)
+       	temp={}
+       	temp['username'] = post[0]
+       	temp['propic']   = "../static/uploads/" + str(post[1])
+       	temp['photo']    = "../static/uploads/" + str(post[2])
+       	temp['caption']  = post[3]
+       	temp['created']  = post[4]
+       	temp['likes']    = lcount
+       	temp['post_id']  = post[5]
+       	temp['liked']    = liked
+       	posts.append(temp)
     return jsonify(posts = posts) 
 
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @requires_auth
-def follow():
-    return 0
+def follow(user_id):
+	followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
+	success_msg=followed
+	return jsonify(success_msg)
 
 
 @app.route('/api/posts/<post_id>/like', methods=['POST'])
 @requires_auth
-def like():
-    return 0
+def like(post_id):
+	liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
+	if liked == 0:
+		db.session.add(Likes(post_id=post_id,user_id=g.current_user['user_id']))
+		db.session.commit()
+		liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
+		print(liked)
+		success_msg=1
+	else:
+		liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).delete()
+		db.session.commit()
+		liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
+		print(liked)
+		success_msg=0
+	return jsonify(success_msg)
 
 
 
