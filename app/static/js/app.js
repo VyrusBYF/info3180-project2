@@ -13,9 +13,6 @@ Vue.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" id= "H" to="/"> Home <span class="sr-only">(current)</span></router-link>
           </li>
-          <li class="nav-item">
-            <router-link class="nav-link" id= "P" to="/posts/new">New Post</router-link>
-          </li>
           <li>
             <router-link class="nav-link" id= "E" to="/explore">Explore</router-link>
           </li>
@@ -80,37 +77,39 @@ function text(){
 
 const Register  = Vue.component('register',{
     template:`
-        <div>
+        <div class = "register-card">
             <h1>Register</h1>
-            <form id ="regForm" method = "POST" @submit.prevent="register" enctype="multipart/form-data">
+            <div class = "regform">
+	            <form id ="regForm" method = "POST" @submit.prevent="register" enctype="multipart/form-data">
 
-                <label>Username</label><br>
-                <input name="username" type="text"><br><br>
-                
-                <label>Password</label><br>
-                <input name="password" type="password"><br><br>
-                
-                <label>First Name</label><br>
-                <input name="firstname" type="text"><br><br>
+	                <label>Username</label><br>
+	                <input name="username" type="text"><br><br>
+	                
+	                <label>Password</label><br>
+	                <input name="password" type="password"><br><br>
+	                
+	                <label>First Name</label><br>
+	                <input name="firstname" type="text"><br><br>
 
-                <label>Last Name</label><br>
-                <input name="lastname" type="text"><br><br>
-                
-                <label>Email</label><br>
-                <input name="email" type="email"><br><br>
-                
-                <label>Locaton</label><br>
-                <input name="location" type="text"><br><br>
+	                <label>Last Name</label><br>
+	                <input name="lastname" type="text"><br><br>
+	                
+	                <label>Email</label><br>
+	                <input name="email" type="email"><br><br>
+	                
+	                <label>Locaton</label><br>
+	                <input name="location" type="text"><br><br>
 
-                <label for="bio">Biography</label><br>
-                <textarea name="biography" placeholder="Insert Text Here" id="bio"></textarea><br>
+	                <label for="bio">Biography</label><br>
+	                <textarea name="biography" placeholder="Insert Text Here" id="bio"></textarea><br>
 
-                <label for="file">Photo</label><br>
-                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
-                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
+	                <label for="file">Photo</label><br>
+	                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
+	                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
 
-                <button type= "submit" id="submitbtn"> Submit </button>
-            </form>
+	                <button type= "submit" id="submitbtn"> Submit </button>
+	            </form>
+            </div>
         </div>
     `,
     created:function(){
@@ -290,9 +289,9 @@ const Logout    = Vue.component('logout',{
 const Explore     = Vue.component('explore',{
     template:`
         <div>
-            <form method = "GET" enctype="multipart/form-data">
-                <button id="exbtn" type="submit" hidden>Explore</button>
-            </form>
+            <router-link class="nav-link" id= "P" to="/posts/new">
+            	<button id="exbtn" type="submit" >New Post</button>
+            </router-link>
             <ul id="feed"> 
                 <li v-for="post in posts">
                     <div class="post-item">
@@ -642,6 +641,7 @@ const Posts     = Vue.component('posts',{
         if(barchan()!= true){
         	router.push({name: 'home'});
         }
+
 	},
      data: function(){
         return {
@@ -654,7 +654,7 @@ const Posts     = Vue.component('posts',{
             let nPostForm = document.getElementById('nPostForm');
             let form_data = new FormData(nPostForm);
             console.log("current user is ", cuser_id)
-            if (user_id != null){
+            if (cuser_id != null){
                 fetch('/api/users/'.concat(cuser_id,'/posts'), {
                     method: 'POST',
                     body: form_data,
@@ -670,6 +670,7 @@ const Posts     = Vue.component('posts',{
                 .then(function (jsonResponse) {
                 // display a success message
                     console.log(jsonResponse);
+                    router.push({name: 'user', params:{user_id:cuser_id}});
                 })
                 .catch(function (error) {
                     console.log(error);

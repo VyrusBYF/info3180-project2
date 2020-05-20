@@ -182,12 +182,12 @@ def userPosts(user_id):
 
     elif request.method == 'GET':
         user = Users.query.with_entities(Users.id, Users.first_name, Users.last_name, Users.pro_pic, Users.location, Users.biography, Users.date_joined).filter_by(id = user_id).first()
-        info = Posts.query.with_entities(Posts.photo).filter_by(user_id = user_id).all()
+        info = Posts.query.with_entities(Posts.photo).filter_by(user_id = user_id).order_by(Posts.id.desc()).all()
         post_count = Posts.query.filter_by(user_id = user_id).count()
         follow_count = Follows.query.filter_by(user_id = user_id).count()
-        print(str(g.current_user['user_id']) != str(user_id))
-        print(str(g.current_user['user_id']))
-        print(str(user_id))
+        #print(str(g.current_user['user_id']) != str(user_id))
+        #print(str(g.current_user['user_id']))
+        #print(str(user_id))
         if str(g.current_user['user_id']) != str(user_id):
             followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
         else:
@@ -213,7 +213,7 @@ def userPosts(user_id):
 @requires_auth
 def posts():
     posts=[]
-    results=Posts.query.with_entities(Users.username, Users.pro_pic, Posts.photo, Posts.caption, Posts.created_on, Posts.id, Posts.user_id).join(Users, Users.id == Posts.user_id).all()
+    results=Posts.query.with_entities(Users.username, Users.pro_pic, Posts.photo, Posts.caption, Posts.created_on, Posts.id, Posts.user_id).join(Users, Users.id == Posts.user_id).order_by(Posts.id.desc()).all()
     #results = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
     for post in results:
        	lcount=Likes.query.filter_by(post_id=post[5]).count()
@@ -242,13 +242,13 @@ def follow(user_id):
 			db.session.add(Follows(user_id=user_id,follower_id=g.current_user['user_id']))
 			db.session.commit()
 			followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
-			print(followed)
+			#print(followed)
 			success_msg=1
 		else:
 			Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).delete()
 			db.session.commit()
 			followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
-			print(followed)
+			#print(followed)
 			success_msg=0
 		return jsonify(success_msg)
 
@@ -262,13 +262,13 @@ def like(post_id):
 			db.session.add(Likes(post_id=post_id,user_id=g.current_user['user_id']))
 			db.session.commit()
 			liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
-			print(liked)
+			#print(liked)
 			success_msg=1
 		else:
 			Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).delete()
 			db.session.commit()
 			liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
-			print(liked)
+			#print(liked)
 			success_msg=0
 		return jsonify(success_msg)
 
