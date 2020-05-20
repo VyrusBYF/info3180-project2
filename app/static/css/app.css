@@ -33,6 +33,22 @@ label{
 	color: white;
 }
 
+#mybtn1{
+    background-color: white;
+    color: black;
+    border-radius: 4px;
+    font-size: 14px;
+    border: solid #c8d6e5 1.7px;
+    font-family: Calibri;
+    transition-duration: 0.4s;
+    width: 90px;
+}
+
+#mybtn1:hover{
+	background-color: black;
+	color: white;
+}
+
 #submitbtn{
 	margin-top: 17px;
 	color:white;
@@ -496,7 +512,40 @@ ul{
 	color: #808080;
 	font-weight: bold;
 }
+.newpost-card{
+	margin-left: 380px;
+	margin-top: 10px;
+}
+.newpost-card h1{
+	font-size: 22px;
+	color: #808080;
+}
+.npform{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: white;
+	width: 350px;
+	height: 250px;
+	margin-top: 30px;
+	-webkit-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+	-moz-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+	box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+}
+.npform input{
+	width: 300px;
+	height: 35px;
+	border-radius: 4px;
+	border: solid #808080 0.7px;
+}
 
+
+.npform label{
+	font-family: Calibri;
+	font-size: 20px;
+	color: #808080;
+	font-weight: bold;
+}
 /*-----------------------------------------------------------Error Handlers------------------------------------------------------------------------*/
 .err{
 	color: red;

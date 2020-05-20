@@ -225,7 +225,7 @@ const Login     = Vue.component('login',{
         <div class = "login-card">
         <h1>Login</h1>
         <div id="unpwerr" class="err" style ="display: none">Incorrect Username/Password</div>
-            <div class = "logform">
+            <div class = "logform" id = "logyform">
                 <form id ="logIForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
 
                     <label>Username</label><br>
@@ -301,19 +301,23 @@ const Login     = Vue.component('login',{
 	                console.log(error);
 	            });
       		}else{
-
+      			count=0;
 				if (!this.username) {
 					$("#unerr").show();
 					$("#unpwerr").hide();
+					count+=1;
 				}else{
 					$("#unerr").hide();        		
 				}
 				if (!this.password) {
 					$("#pwerr").show();
 					$("#unpwerr").hide();
+					count+=1;
 				}else{
 					$("#pwerr").hide();
 				}
+				result=25*count+300;
+				document.getElementById("logyform").style.height = result+"px";
 			}
       	}
             
@@ -714,19 +718,22 @@ const Users     = Vue.component('users',{
 
 const Posts     = Vue.component('posts',{
     template:`
-        <div>
+        <div class = "newpost-card">
             <h1>New Post</h1>
-            <form id ="nPostForm" method = "POST" @submit.prevent="new_post" enctype="multipart/form-data">
+            <div class = "npform" id ="npiform">
+	            <form id ="nPostForm" method = "POST" @submit.prevent="new_post" enctype="multipart/form-data">
 
-                <label for="file">Photo</label><br>
-                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
-                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
+	                <label for="file">Photo</label><br>
+	                <div id="flerr" class="err" style ="display: none">Picture Required To Post</div>
+	                <input name="photo" v-model="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
+	                <button type="button" id="mybtn1" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
 
-                <label for="caption">Caption</label><br>
-                <textarea name="caption" placeholder="Insert Text Here" id="bio"></textarea><br>
+	                <label for="caption">Caption</label><br>
+	                <textarea name="caption" placeholder="Insert Text Here" id="bio"></textarea><br>
 
-                <button type= "submit" id="submitbtn"> Submit </button>
-            </form>
+	                <button type= "submit" id="submitbtn"> Submit </button>
+	            </form>
+            </div>
         </div>
     `,
     created:function(){
@@ -738,38 +745,52 @@ const Posts     = Vue.component('posts',{
      data: function(){
         return {
             messages: [],
+            photo:null,
             error: []
         };
     },
     methods:{
         new_post: function(){
-            let nPostForm = document.getElementById('nPostForm');
-            let form_data = new FormData(nPostForm);
-            console.log("current user is ", cuser_id)
-            if (cuser_id != null){
-                fetch('/api/users/'.concat(cuser_id,'/posts'), {
-                    method: 'POST',
-                    body: form_data,
-                    headers:{
-                        'X-CSRFToken': token,
-                        'Authorization': 'Bearer ' + localStorage.getItem('token')
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (jsonResponse) {
-                // display a success message
-                    console.log(jsonResponse);
-                    router.push({name: 'user', params:{user_id:cuser_id}});
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
-            }else{
-                console.log("There is no user logged in");
-            }
+        	if (this.username && this.password && this.firstname && this.lastname && this.email && this.location && this.photo) {
+	            let nPostForm = document.getElementById('nPostForm');
+	            let form_data = new FormData(nPostForm);
+	            console.log("current user is ", cuser_id)
+	            if (cuser_id != null){
+	                fetch('/api/users/'.concat(cuser_id,'/posts'), {
+	                    method: 'POST',
+	                    body: form_data,
+	                    headers:{
+	                        'X-CSRFToken': token,
+	                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+	                    },
+	                    credentials: 'same-origin'
+	                })
+	                .then(function (response) {
+	                    return response.json();
+	                })
+	                .then(function (jsonResponse) {
+	                // display a success message
+	                    console.log(jsonResponse);
+	                    router.push({name: 'user', params:{user_id:cuser_id}});
+	                })
+	                .catch(function (error) {
+	                    console.log(error);
+	                });
+	            }else{
+	                console.log("There is no user logged in");
+	            }
+        	}else{
+        		count=0;
+        		if (!this.photo) {
+					$("#flerr").show();
+					count+=1;
+				}else{
+					$("#flerr").hide();        		
+				}
+				result=25*count+250;
+				document.getElementById("npiform").style.height = result+"px";
+        	}
+            
         }
     }
 });
@@ -816,55 +837,6 @@ const Home = Vue.component('home', {
     }
 });
 
-
-const Upload = Vue.component('upload-form',{
-    template: `
-        <div>
-            <h1>Upload Form</h1>
-            <form id ="uploadForm" method = "POST" @submit.prevent="uploadPhoto" enctype="multipart/form-data">
-                <label for="desc">Description</label><br>
-                <textarea name="description" placeholder="Insert Text Here" id="desc"></textarea><br>
-
-                <label for="file">Photo Upload</label><br>
-                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
-                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
-
-                <button type= "submit" id="submitbtn"> Submit </button>
-            </form>
-        </div>
-  `,
-    data: function(){
-        return {
-            messages: [],
-            error: []
-        };
-    },
-    methods:{
-        uploadPhoto: function(){
-            let uploadForm = document.getElementById('uploadForm');
-            let form_data = new FormData(uploadForm);
-
-            fetch('/api/upload', {
-                method: 'POST',
-                body: form_data,
-                headers:{
-                    'X-CSRFToken': token
-                },
-                credentials: 'same-origin'
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (jsonResponse) {
-            // display a success message
-                console.log(jsonResponse);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-        }
-    }
-});
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
