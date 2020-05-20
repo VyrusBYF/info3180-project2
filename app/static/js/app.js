@@ -751,7 +751,7 @@ const Posts     = Vue.component('posts',{
     },
     methods:{
         new_post: function(){
-        	if (this.username && this.password && this.firstname && this.lastname && this.email && this.location && this.photo) {
+        	if (this.photo) {
 	            let nPostForm = document.getElementById('nPostForm');
 	            let form_data = new FormData(nPostForm);
 	            console.log("current user is ", cuser_id)
