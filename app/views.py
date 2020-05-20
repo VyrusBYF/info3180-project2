@@ -125,6 +125,7 @@ def register():
         return message
     return render_template('register.html',form = form)
 
+
 @app.route('/api/auth/login', methods=['POST'])
 def login():
     error = None
@@ -145,6 +146,7 @@ def login():
                 return message
     return render_template('login.html', error=error)
 
+
 @app.route('/api/auth/logout', methods=['GET'])
 @requires_auth
 def logout():
@@ -155,6 +157,8 @@ def logout():
 def userPosts(user_id):
     form = PostForm()
 """
+
+
 @app.route('/api/users/<user_id>/posts', methods=['GET','POST'])
 @requires_auth
 def userPosts(user_id):
@@ -177,9 +181,24 @@ def userPosts(user_id):
         return jsonify(success_msg)
 
     elif request.method == 'GET':
-        posts = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
-        print (posts)    
-    return 0
+        user = Users.query.with_entities(Users.id, Users.first_name, Users.last_name, Users.pro_pic, Users.location, Users.biography, Users.date_joined).filter_by(id = user_id).first()
+        info = Posts.query.with_entities(Posts.photo).filter_by(user_id = user_id).all()
+        post_count = Posts.query.filter_by(user_id = user_id).count()
+        follow_count = Follows.query.filter_by(user_id = user_id).count()
+        details={}
+        photos={'pics':[]}
+        details['fname']=user[1]
+        details['lname']=user[2]
+        details['pro_pic']="../static/uploads/" + str(user[3])
+        details['location']= user[4]
+        details['bio']=user[5]
+        details['join_date']= "Member since " + str(user[6])
+
+        for pic in info:
+            photos['pics'].append("../static/uploads/" + str(pic[0]))
+        return jsonify(user = details, posts = post_count, followers=follow_count, photos = photos)
+    return jsonify('Something went wrong!')
+
 
 @app.route('/api/posts', methods=['GET'])
 @requires_auth

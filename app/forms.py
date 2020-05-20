@@ -11,7 +11,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired, FileAllowed
 from wtforms import StringField, SelectField, PasswordField, TextAreaField, FileField, IntegerField
-from wtforms.validators import InputRequired, DataRequired
+from wtforms.validators import InputRequired, DataRequired, Length
 
 class PostForm(FlaskForm):
 	caption = TextAreaField('Caption')
@@ -24,7 +24,7 @@ class RegistrationForm(FlaskForm):
 	lastname = StringField('Lastname', validators=[InputRequired()])
 	email = StringField('Email', validators=[InputRequired()])
 	location = StringField('Location', validators=[InputRequired()])
-	biography = TextAreaField('Biography')
+	biography = TextAreaField('Biography', validators=[Length(max=200, min=2)])
 	photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png'])])
 	
 

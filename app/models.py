@@ -25,7 +25,7 @@ class Users(db.Model):
     last_name = db.Column(db.String(80))
     email = db.Column(db.String(80))
     location = db.Column(db.String(80))
-    biography = db.Column(db.String(500))
+    biography = db.Column(db.String(200))
     pro_pic=db.Column(db.String(300))
     date_joined = db.Column(db.String(30))
 
@@ -63,7 +63,7 @@ class Posts (db.Model):
     id = db.Column(db.Integer, primary_key=True,unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
     photo = db.Column(db.String(300))
-    caption = db.Column(db.String(500))
+    caption = db.Column(db.String(200))
     created_on = db.Column(db.String(30))
 
 

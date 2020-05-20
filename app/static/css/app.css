@@ -61,10 +61,9 @@ button:focus, button:active:focus, button.active:focus {
 .post-item{
 	display: grid;
 	background-color: white;	
-	grid-template: 8% 52% 28% 10% / 50% 50%;
-	width: 50%;
-	height: 600px;
-	border: solid 0.02px black;
+	grid-template: 10% 52% 28% 10% / 50% 50%;
+	width: 450px;
+	height: 500px;
 	-webkit-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
 	-moz-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
 	box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
@@ -72,31 +71,37 @@ button:focus, button:active:focus, button.active:focus {
 
 #feed{
 	list-style: none;
+	margin-left: 25%;
 }
 .grid1{
 	/*border: solid 2px red;*/
 	grid-column: 1 / span 2;
 	display: flex;
+	text-align: center;
 	align-items: center;
 	font-size: 12px;
+	margin-top: 20px;
 }
 
 .grid2{
 	/*border: solid 2px red;*/
 	grid-column: 1 / span 2;
+	text-align: center;
+	margin-top: 20px;
 }
 
 
 .grid3{
 	/*border: solid 2px red;*/
 	grid-column: 1 / span 2;
-	margin-left: 8px;
-	margin-right: 8px;
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 20px;
 }
 .grid4{
 	/*border: solid 2px red;*/
 	grid-column: 1 / span 1;
-	margin-left: 8px;
+	margin-left: 12px;
 	display: flex;
 	align-items: center;
 }
@@ -113,14 +118,14 @@ button:focus, button:active:focus, button.active:focus {
 
 
 .grid1 img{
-	height: 20px;
-	width: 20px;
+	height: 30px;
+	width: 30px;
 	margin-right: 8px;
-	margin-left: 4px;
+	margin-left: 20px;
 }
 
 .grid2 img{
-	height: 300px;
+	height: 250px;
 	width: 100%;
 }
 .grid4 i{
@@ -135,8 +140,237 @@ ul{
 	list-style: none;
 }
 
-.like-button{
-	outline: none;
-	border: none;
-	background: none;
+/*-----------------------------------------------------------Profile Page------------------------------------------------------------------------*/
+
+.profile-card{
+	display: grid;
+	background-color: white;	
+	grid-template: 10% auto auto / 24% 56% 10% 10%;
+	width: 940px;
+	height: 225px;
+	-webkit-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+	-moz-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+	box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
 }
+
+.pgrid1{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/*border: solid 2px purple;*/
+	grid-row: 1 / span 3; 
+}
+.pgrid2{
+	margin-left: 24px;
+	margin-top: 20px;
+	/*border: solid 2px purple;*/
+	grid-row: 1 / span 3 ;
+	font-family: Calibri;
+	color: #808080;
+}
+.pgrid3{	
+	display: flex;
+	text-align: center;
+	align-items: center;
+	justify-content: center;
+	/*border: solid 2px purple;*/
+	grid-row: 1 / span 1;
+	font-family: Calibri;
+	font-weight: bold;
+	margin-top: 60px;
+
+
+}
+.pgrid3-2{
+	display: flex;
+	text-align: center;
+	align-items: center;
+	justify-content: center;
+	/*border: solid 2px purple;*/
+	font-family: Calibri;
+	font-weight: bold;
+	grid-row: 1 / span 1;
+	margin-top: 60px;
+}
+.pgrid3-3{
+	/*border: solid 2px purple;*/
+	grid-row: 2 / span 1;
+	grid-column: 3 / span 1;
+	text-align: center;
+	margin-top: 50px;
+	margin-bottom: -50px;
+	font-family: Calibri;
+	font-weight: bold;
+	color: #808080;
+}
+.pgrid3-4{
+	/*border: solid 2px purple;*/
+	grid-row: 2 / span 1;
+	grid-column: 4 / span 1;
+	text-align: center;
+	margin-top: 50px;
+	margin-bottom: -50px;
+	font-family: Calibri;
+	color: #808080;
+	font-weight: bold;
+}
+
+.pgrid4{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/*border: solid 2px purple;*/
+	grid-column: 3 / span 2;
+	grid-row: 3 / span 1;
+	font-family: Calibri;
+}
+
+
+
+.pgrid1 img{
+	height: 100%;
+	width: 100%;
+}
+
+.pgrid2 span{
+	font-size: 16;
+	font-weight: bold;
+	color: black;
+}
+
+.pgrid4 button{
+	margin-top: 17px;
+	color:white;
+	background-color:#1B9CFC;
+	border-radius: 4px;
+	border: solid #c8d6e5 0.7px;
+	font-size: 12px;
+	width: 65%;
+	height: 30%;
+}
+
+#userposts{
+	margin-top: 30px;
+	display: block;
+	margin-left: -40px;
+}
+#userposts li{
+	display: inline-block;
+	vertical-align: middle;
+}
+#userposts img{
+	width: 300px;
+	height: 300px;
+	margin-right: 20px;
+	margin-bottom: 20px;
+
+}
+
+
+/*-----------------------------------------------------------Home Page------------------------------------------------------------------------*/
+
+
+.homegrid-outer{
+	margin-top: 100px;
+	/*border: solid purple 2px;*/
+	display: grid;
+	grid-template: 100% / 50% 50%;
+	width: 70%;
+	margin-left: 18%;
+}
+
+.homegrid-inner{
+	/*border: solid black 2px;*/
+	background-color: white;
+	display: grid;
+	grid-template: 33% 27% 39% / 25% 25% 25% 25%;
+	height: 400px;
+	-webkit-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+	-moz-box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+	box-shadow: -1px 1px 9px 0px rgba(0,0,0,0.53);
+}
+.homephoto{
+	/*border: solid yellow 2px;*/
+	padding-right: 10px;
+	width: 100%;
+}
+	
+.homegrid1{
+	width: 85%;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	/*border: solid 2px red;*/
+	border-bottom: solid #D0D0D0 0.2px; 
+	margin-top: 40px;
+	margin-left: 30px;
+	height: 60%; 
+	grid-column: 1 / span 4;
+	font-family: Calibri;
+	font-weight: bold;
+}
+.homegrid2{
+	/*border: solid 2px green;*/
+	grid-row: 2 / span 1;
+	grid-column: 1 / span 4;
+	height: 90%;
+	margin-left: 40px;
+}
+.homegrid3{
+	text-align: center;
+	/*border: solid 2px green;*/
+	grid-row: 3 / span 1;
+	grid-column: 1 / span 2;
+}
+.homegrid3-2{
+	text-align: center;
+	/*border: solid 2px green;*/
+	grid-row: 3 / span 1;
+	grid-column: 3 / span 2;
+}
+
+
+
+
+
+.homegrid-outer img{
+	width: 100%;
+	height: 100%;
+}
+
+.homegrid1 span{
+	font-size: 30px;
+	font-family: Brush Script MT;
+}
+.homegrid1 i{
+	margin-bottom: 12px;
+}
+
+.regbtn{
+	color:white;
+	background-color: #4AC948;
+	border-radius: 4px;
+	border: solid #c8d6e5 0.7px;
+	font-size: 12px;
+	width: 85%;
+	height: 22%;
+	font-family: Calibri;
+	font-size: 17px;
+	margin-left: 20px;
+	margin-top: -35px;
+}
+
+.logbtn{
+	color:white;
+	background-color:#1B9CFC;
+	border-radius: 4px;
+	border: solid #c8d6e5 0.7px;
+	font-size: 12px;
+	width: 85%;
+	height: 22%;
+	font-family: Calibri;
+	font-size: 17px;
+	margin-right: 20px;
+	margin-top: -40px;
+}
+

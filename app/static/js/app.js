@@ -23,7 +23,7 @@ Vue.component('app-header', {
             <router-link class="nav-link" id= "P" to="/posts/new">Post</router-link>
           </li>
           <li>
-            <router-link class="nav-link" id= "MP" to="/users/${localStorage.getItem('user_id')}">My Posts</router-link>
+            <router-link class="nav-link" id= "MP" to="/users/${localStorage.getItem('user_id')}"> My Profile</router-link>
           </li>
           <li>
             <router-link class="nav-link" id= "E" to="/explore">Explore</router-link>
@@ -76,9 +76,6 @@ function text(){
 
     mytext.innerHTML = text[text.length-1];
 
-}
-
-function explorebtn(){
 }
 
 const Register  = Vue.component('register',{
@@ -160,6 +157,8 @@ const Register  = Vue.component('register',{
         }
     }
 });
+
+
 const Login     = Vue.component('login',{
     template:`
         <div>
@@ -295,7 +294,7 @@ const Explore     = Vue.component('explore',{
             <form method = "GET" enctype="multipart/form-data">
                 <button id="exbtn" type="submit" hidden>Explore</button>
             </form>
-            <ul>
+            <ul id="feed"> 
                 <li v-for="post in posts">
                     <div class="post-item">
                         <div class="grid1">
@@ -331,6 +330,7 @@ const Explore     = Vue.component('explore',{
                             {{ post.created }}
                         </div>
                     </div>
+                <br>
                 </li>
             </ul>
         </div>
@@ -411,47 +411,81 @@ const Explore     = Vue.component('explore',{
             .catch(function (error) {
                 console.log(error);
             });
-}
+        }
     }
 });
+
 const Users     = Vue.component('users',{
     template:`
         <div>
-            <ul>
-                <li v-for="post in posts">post.user_id<br>post.caption</li>
+            <div class="profile-card">
+                <div class="pgrid1">
+                    <img v-bind:src= user.pro_pic>
+                </div>
+                <div class="pgrid2">
+                    <span id="fullname"> {{ user.fname }} {{ user.lname }} </span><br><br>
+                    {{ user.location }}<br>
+                    {{ user.join_date }}<br><br>
+                    {{ user.bio }}
+                </div>
+                <div class="pgrid3">
+                    {{ posts }}
+                </div>
+                <div class="pgrid3-2">
+                    {{ followers }}                   
+                </div>
+                <div class="pgrid3-3">
+                    Posts
+                </div>
+                <div class="pgrid3-4">
+                    Followers 
+                </div>
+                <div class="pgrid4">
+                    <button>Follow</button>
+                </div>
+            </div>
+            <ul id="userposts">
+                <li v-for= "i in photos.pics">
+                    <img v-bind:src= i >
+                </li>
             </ul>
         </div>
     `,
-    get_posts: function(){
-            let self = this;
-            fetch('/api/users/'.concat(user_id,'/posts'), {
-                method: 'GET',
-                headers:{
-                    
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                credentials: 'same-origin'
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (jsonResponse) {
-            // display a success message
-                console.log(jsonResponse);
-                self.posts = jsonResponse.posts;
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    },
     created:function(){
         if(barchan()!= true){
         	router.push({name: 'home'});
         }
+        let self = this;
+        fetch('/api/users/'.concat(user_id,'/posts'), {
+            method: 'GET',
+            headers:{
+                
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            credentials: 'same-origin'
+        })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (jsonResponse) {
+        // display a success message
+            console.log(jsonResponse);
+            self.user = jsonResponse.user;
+            self.posts = jsonResponse.posts;
+            self.followers = jsonResponse.followers;
+            self.photos = jsonResponse.photos;
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 	},
     data: function(){
         return{
-            posts: []
+            user: [],
+            posts: 0,
+            followers: 0,
+            count:0,
+            photos: []
         };
     },
 });
@@ -520,9 +554,24 @@ const Posts     = Vue.component('posts',{
 const Home = Vue.component('home', {
 
    	template: `
-    <div class="jumbotron">
-        <h1>Project 2</h1>
-        <p class="lead">The project was made by 620097204 and 620096242.</p>
+    <div class="homegrid-outer">
+        <div class="homephoto">
+            <img src = "https://static.boredpanda.com/blog/wp-content/uploads/2017/07/1-DSC_0555-1c-Liubarto-5977af6e84a8a__880.jpg"> 
+        </div>
+        <div class = "homegrid-inner">
+            <div class="homegrid1 hometitle">
+                <i class="fas fa-camera" style="margin-right:7px"></i> <span> Photogram </span>
+            </div>
+            <div class="homegrid2">
+                Share photo of your favorite moments with friends family and the world.
+            </div>
+            <div class="homegrid3">
+                <button class = "regbtn"> Register</button>
+            </div>
+             <div class="homegrid3-2">
+                <button class="logbtn">Login</button>
+            </div>
+        </div>
    	 </div>
    	`,
     data: function() {
@@ -594,9 +643,6 @@ const Upload = Vue.component('upload-form',{
 Vue.component('app-footer', {
     template: `
     <footer>
-        <div class="container">
-            <p>Copyright &copy; Flask Inc.</p>
-        </div>
     </footer>
     `
 });
@@ -623,7 +669,7 @@ const router = new VueRouter({
         {path: "/login", component: Login , name: "login" },
         {path: "/logout", component: Logout, name: 'logout'},
         {path: "/explore", component: Explore, name: 'explore'},
-        {path: '/users/{user_id}', component: Users, name:'user'},
+        {path: '/users/'.concat(localStorage.getItem('user_id')), component: Users, name:'user'},
         {path: "/posts/new", component: Posts, name:'new post'},
 
         // This is a catch all route in case none of the above matches
