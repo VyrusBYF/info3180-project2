@@ -161,19 +161,20 @@ const Register  = Vue.component('register',{
 
 const Login     = Vue.component('login',{
     template:`
-        <div>
-            <h1>Login</h1>
-            <form id ="logIForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
+        <div class = "login-card">
+        <h1>Login</h1>
+            <div class = "logform">
+                <form id ="logIForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
 
-                <label>Username</label><br>
-                <input name="username" type="text"><br><br>
-                
-                <label>Password</label><br>
-                <input name="password" type="password"><br><br>
-                
-                <button type= "submit" id="submitbtn"> Submit </button>
-            </form>
-
+                    <label>Username</label><br>
+                    <input name="username" type="text"><br><br>
+                    
+                    <label>Password</label><br>
+                    <input name="password" type="password"><br><br>
+                    
+                    <button type= "submit"> Login </button>
+                </form>
+            </div>
         </div>
 
     `,
