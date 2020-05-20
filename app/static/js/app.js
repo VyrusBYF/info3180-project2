@@ -97,7 +97,7 @@ const Register  = Vue.component('register',{
 	                <label>Email</label><br>
 	                <input name="email" type="email"><br><br>
 	                
-	                <label>Locaton</label><br>
+	                <label>Location</label><br>
 	                <input name="location" type="text"><br><br>
 
 	                <label for="bio">Biography</label><br>
