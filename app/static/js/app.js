@@ -79,7 +79,7 @@ const Register  = Vue.component('register',{
     template:`
         <div class = "register-card">
             <h1>Register</h1>
-            <div class = "regform">
+            <div class = "regiform">
 	            <form id ="regForm" method = "POST" @submit.prevent="register" enctype="multipart/form-data">
 
 	                <label>Username</label><br>

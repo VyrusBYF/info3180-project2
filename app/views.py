@@ -119,7 +119,7 @@ def register():
         userid = Users.query.with_entities(Users.id).filter_by(username=usrname).first()
         #print(userid[0])
         success_msg= usrname + "registered successfully"
-        js_msg = {"message":success_msg, "Username": usrname, "user_id": userid[0], "status":"logged_in"}
+        js_msg = {"message":success_msg, "Username": usrname, "user_id": userid[0], "status":True}
         message = jsonify(js_msg)
         #print(message)
         return message
