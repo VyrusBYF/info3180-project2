@@ -79,32 +79,39 @@ const Register  = Vue.component('register',{
     template:`
         <div class = "register-card">
             <h1>Register</h1>
-            <div class = "regiform">
+            <div class = "regiform" id = "regigrow">
 	            <form id ="regForm" method = "POST" @submit.prevent="register" enctype="multipart/form-data">
 
 	                <label>Username</label><br>
-	                <input name="username" type="text"><br><br>
+	                <div id="unerr" class="err" style ="display: none">Username Required</div>
+	                <input name="username" v-model="username" type="text"><br><br>
 	                
 	                <label>Password</label><br>
-	                <input name="password" type="password"><br><br>
+	                <div id="pwerr" class="err" style ="display: none">Password Required</div>
+	                <input name="password" v-model="password" type="password"><br><br>
 	                
 	                <label>First Name</label><br>
-	                <input name="firstname" type="text"><br><br>
+	                <div id="fnerr" class="err" style ="display: none">First Name Required</div>
+	                <input name="firstname" v-model="firstname" type="text"><br><br>
 
 	                <label>Last Name</label><br>
-	                <input name="lastname" type="text"><br><br>
+	                <div id="lnerr" class="err" style ="display: none">Last Name Required</div>
+	                <input name="lastname" v-model="lastname" type="text"><br><br>
 	                
 	                <label>Email</label><br>
-	                <input name="email" type="email"><br><br>
+	                <div id="emerr" class="err" style ="display: none">Email Required</div>
+	                <input name="email" v-model="email" type="email"><br><br>
 	                
 	                <label>Location</label><br>
-	                <input name="location" type="text"><br><br>
+	                <div id="locerr" class="err" style ="display: none">Location Required</div>
+	                <input name="location" v-model="location" type="text"><br><br>
 
 	                <label for="bio">Biography</label><br>
 	                <textarea name="biography" placeholder="Insert Text Here" id="bio"></textarea><br>
 
 	                <label for="file">Photo</label><br>
-	                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
+	                <div id="flerr" class="err" style ="display: none">Profile Picture Required</div>
+	                <input name="photo" v-model="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
 	                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
 
 	                <button type= "submit" id="submitbtn"> Register </button>
@@ -120,37 +127,94 @@ const Register  = Vue.component('register',{
     data: function(){
         return {
             messages: [],
-            error: []
+            error: [],
+            username: null,
+        	password: null,
+        	firstname:null,
+        	lastname:null,
+        	email:null,
+        	location:null,
+        	photo:null,
         };
     },
     methods:{
         register: function(){
-            let regForm = document.getElementById('regForm');
-            let form_data = new FormData(regForm);
+        	if (this.username && this.password && this.firstname && this.lastname && this.email && this.location && this.photo) {
+        		let regForm = document.getElementById('regForm');
+	            let form_data = new FormData(regForm);
 
-            fetch('/api/users/register', {
-                method: 'POST',
-                body: form_data,
-                headers:{
-                    'X-CSRFToken': token
-                },
-                credentials: 'same-origin'
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (jsonResponse) {
-            // display a success message
-                console.log(jsonResponse);
-                auth_status = jsonResponse.status;
-                if(auth_status == true){
-                    router.push({ name: "login"})
-                }
-                
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+	            fetch('/api/users/register', {
+	                method: 'POST',
+	                body: form_data,
+	                headers:{
+	                    'X-CSRFToken': token
+	                },
+	                credentials: 'same-origin'
+	            })
+	            .then(function (response) {
+	                return response.json();
+	            })
+	            .then(function (jsonResponse) {
+	            // display a success message
+	                console.log(jsonResponse);
+	                auth_status = jsonResponse.status;
+	                if(auth_status == true){
+	                    router.push({ name: "login"})
+	                }
+	                
+	            })
+	            .catch(function (error) {
+	                console.log(error);
+	            });
+        	}else{
+        		count=0;
+        		if (!this.username) {
+					$("#unerr").show();
+					count+=1;
+				}else{
+					$("#unerr").hide();        		
+				}
+				if (!this.password) {
+					$("#pwerr").show();
+					count+=1;
+				}else{
+					$("#pwerr").hide();
+				}
+				if (!this.firstname) {
+					$("#fnerr").show();
+					count+=1;
+				}else{
+					$("#fnerr").hide();        		
+				}
+				if (!this.lastname) {
+					$("#lnerr").show();
+					count+=1;
+				}else{
+					$("#lnerr").hide();
+				}
+				if (!this.email) {
+					$("#emerr").show();
+					count+=1;
+				}else{
+					$("#emerr").hide();        		
+				}
+				if (!this.location) {
+					$("#locerr").show();
+					count+=1;
+				}else{
+					$("#locerr").hide();
+				}
+				if (!this.photo) {
+					$("#flerr").show();
+					count+=1;
+				}else{
+					$("#flerr").hide();        		
+				}
+				result=25*count+860;
+				document.getElementById("regigrow").style.height = result+"px";
+
+        	}
+            
         }
     }
 });
@@ -160,14 +224,17 @@ const Login     = Vue.component('login',{
     template:`
         <div class = "login-card">
         <h1>Login</h1>
+        <div id="unpwerr" class="err" style ="display: none">Incorrect Username/Password</div>
             <div class = "logform">
                 <form id ="logIForm" method = "POST" @submit.prevent="login" enctype="multipart/form-data">
 
                     <label>Username</label><br>
-                    <input name="username" type="text"><br><br>
+                    <div id="unerr" class="err" style ="display: none">Username Required</div>
+                    <input name="username" v-model="username" type="text"><br><br>
                     
                     <label>Password</label><br>
-                    <input name="password" type="password"><br><br>
+                    <div id="pwerr" class="err" style ="display: none">Password Required</div>
+                    <input name="password" v-model="password" type="password"><br><br>
                     
                     <button type= "submit"> Login </button>
                 </form>
@@ -182,49 +249,74 @@ const Login     = Vue.component('login',{
 	},
     data: function(){
         return {
+        	username: null,
+        	password: null,
             messages: [],
             error: []
         };
     },
     methods:{
         login: function(){
-            let logIForm = document.getElementById('logIForm');
-            let form_data = new FormData(logIForm);
+        	if (this.username && this.password) {
+        		$("#unerr").hide();
+        		$("#pwerr").hide();
+       			let logIForm = document.getElementById('logIForm');
+	            let form_data = new FormData(logIForm);
+	            console.log(form_data)
+	            fetch('/api/auth/login', {
+	                method: 'POST',
+	                body: form_data,
+	                headers:{
+	                    'X-CSRFToken': token
 
-            fetch('/api/auth/login', {
-                method: 'POST',
-                body: form_data,
-                headers:{
-                    'X-CSRFToken': token
+	                },
+	                credentials: 'same-origin'
+	            })
+	            .then(function (response) {
+	                return response.json();
+	            })
+	            .then(function (jsonResponse) {
+	            // display a success message
+	                console.log(jsonResponse);
+	                jsonResponse.status
+	                auth_status = jsonResponse.status;
+	                if(auth_status== true){
+	                    cuser_id = jsonResponse.user_id;
+	                    localStorage.setItem('cuser_id', cuser_id);
+	                    console.log(cuser_id);
+		                let jwt_token = jsonResponse.token;
+		                console.log(localStorage);
+		                localStorage.setItem('token', jwt_token);
+		                console.info('Token generated and added to localStorage.');
+		                self.token = jwt_token;
+		                router.push({name: 'explore'});
+	                }else{
+	                	$("#unerr").hide();
+	                	$("#pwerr").hide();
+	                	$("#unpwerr").show();
+	                }
 
-                },
-                credentials: 'same-origin'
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (jsonResponse) {
-            // display a success message
-                console.log(jsonResponse);
-                jsonResponse.status
-                auth_status = jsonResponse.status;
-                if(auth_status== true){
-                    cuser_id = jsonResponse.user_id;
-                    localStorage.setItem('cuser_id', cuser_id);
-                    console.log(cuser_id);
-                }
-                let jwt_token = jsonResponse.token;
-                console.log(localStorage);
-                localStorage.setItem('token', jwt_token);
-                console.info('Token generated and added to localStorage.');
-                self.token = jwt_token;
+	            })
+	            .catch(function (error) {
+	                console.log(error);
+	            });
+      		}else{
 
-                router.push({name: 'explore'});
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-        }
+				if (!this.username) {
+					$("#unerr").show();
+					$("#unpwerr").hide();
+				}else{
+					$("#unerr").hide();        		
+				}
+				if (!this.password) {
+					$("#pwerr").show();
+					$("#unpwerr").hide();
+				}else{
+					$("#pwerr").hide();
+				}
+			}
+      	}
+            
     }
 });
 

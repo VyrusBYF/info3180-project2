@@ -135,8 +135,8 @@ def login():
         passwrd = login.password.data
         usr=Users.query.filter_by(username=usrname).first()
         if usr == None :
-            error = 'Invalid username or password'
-            print (error)
+            error = 'Invalid Username/Password'
+            return jsonify (error)
         else:
             if check_password_hash(usr.password,passwrd) == True:
                 success_msg= usrname + " logged in successfully"
@@ -144,7 +144,10 @@ def login():
                 js_msg = {"message":success_msg, "Username": usr.username, "user_id": usr.id, "status": True ,'token': token } 
                 message = jsonify(js_msg)
                 return message
-    return render_template('login.html', error=error)
+            else:
+            	error = 'Invalid Username/Password'
+            	return jsonify (error)
+    
 
 
 @app.route('/api/auth/logout', methods=['GET'])
