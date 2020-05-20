@@ -11,22 +11,16 @@ Vue.component('app-header', {
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
+            <router-link class="nav-link" id= "H" to="/"> Home <span class="sr-only">(current)</span></router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" id= "R" to="/register">Register</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" id= "LI" to="/login">Login</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" id= "P" to="/posts/new">Post</router-link>
-          </li>
-          <li>
-            <router-link class="nav-link" id= "MP" to="/users/${localStorage.getItem('user_id')}"> My Profile</router-link>
+            <router-link class="nav-link" id= "P" to="/posts/new">New Post</router-link>
           </li>
           <li>
             <router-link class="nav-link" id= "E" to="/explore">Explore</router-link>
+          </li>
+          <li>
+            <router-link class="nav-link" id= "MP" to="/users/${localStorage.getItem('cuser_id')}"> My Profile</router-link>
           </li>
           <li>
             <router-link class="nav-link" id= "LO" to="/logout">Log Out</router-link>
@@ -39,10 +33,15 @@ Vue.component('app-header', {
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 var auth_status = null;
-var user_id = localStorage.getItem('user_id');
-
+var cuser_id = localStorage.getItem('cuser_id');
+var user_id = null;
+var users=[];
+function chguserid(new_id){
+	user_id = new_id;
+}
 function barchan(){
-	if(localStorage.getItem('token')!==null & localStorage.getItem('user_id')!==null){
+	if(localStorage.getItem('token')!==null & localStorage.getItem('cuser_id')!==null){
+		$("#H").hide();
 		$("#R").hide();
 		$("#LI").hide();
 		$("#P").show();
@@ -51,6 +50,7 @@ function barchan(){
 		$("#LO").show();
 		return true;
 	}else{
+		$("#H").show();
 		$("#R").show();
 		$("#LI").show();
 		$("#P").hide();
@@ -145,11 +145,9 @@ const Register  = Vue.component('register',{
                 console.log(jsonResponse);
                 auth_status = jsonResponse.status;
                 if(auth_status == true){
-                    user_id = jsonResponse.user_id;
-                    console.log(user_id);
-
+                    router.push({ name: "login"})
                 }
-                router.push({ name: "login"})
+                
             })
             .catch(function (error) {
                 console.log(error);
@@ -212,9 +210,9 @@ const Login     = Vue.component('login',{
                 jsonResponse.status
                 auth_status = jsonResponse.status;
                 if(auth_status== true){
-                    user_id = jsonResponse.user_id;
-                    localStorage.setItem('user_id', user_id);
-                    console.log(user_id);
+                    cuser_id = jsonResponse.user_id;
+                    localStorage.setItem('cuser_id', cuser_id);
+                    console.log(cuser_id);
                 }
                 let jwt_token = jsonResponse.token;
                 console.log(localStorage);
@@ -299,7 +297,9 @@ const Explore     = Vue.component('explore',{
                 <li v-for="post in posts">
                     <div class="post-item">
                         <div class="grid1">
-                            <img v-bind:src="post.propic"> {{post.username}}
+            				<router-link id="UP" :to="'/users/' + post.post_uid">
+            					<img v-bind:src="post.propic"> {{post.username}}
+            				</router-link>  	
                         </div>
                         <div class="grid2">
                              <span id="postpic"><img v-bind:src ="post.photo" alt = "Gaza" class= "image"></span>
@@ -358,6 +358,7 @@ const Explore     = Vue.component('explore',{
             .then(function (jsonResponse) {
             // display a success message
                 console.log(jsonResponse);
+                users=jsonResponse.users
                 self.posts = jsonResponse.posts; 
             })
             .catch(function (error) {
@@ -385,12 +386,10 @@ const Explore     = Vue.component('explore',{
             })
             .then(function (jsonResponse) {
             // display a success message
-                console.log(jsonResponse);
-                console.log(liked)
-                console.log("#snotliked"+post_id.toString())
+
                 if (liked==0) {
                 	if (jsonResponse == 0) {
-                		$("#snotliked").show();
+                		$("#snotliked"+post_id.toString()).show();
 						$("#liked"+post_id.toString()).hide();
 					}else if (jsonResponse == 1) {
                 		$("#snotliked"+post_id.toString()).hide();
@@ -429,21 +428,104 @@ const Users     = Vue.component('users',{
                     {{ user.join_date }}<br><br>
                     {{ user.bio }}
                 </div>
-                <div class="pgrid3">
-                    {{ posts }}
+                <div>
+	                <div v-if="user.followed==0">
+	                	<div class ="pgrid3" :id = "'snotfollowed'+user.user_id" >
+		                	<div class="spgrid1">
+			                    {{ posts }}
+			                </div>
+			                <div class="spgrid2">
+			                    {{ followers }}                   
+			                </div>
+			                <div class="spgrid3">
+			                    Posts
+			                </div>
+			                <div class="spgrid4">
+			                    Followers 
+			                </div>
+		                	<div class="spgrid5">
+			                    <button v-on:click="follows(user.user_id,0)"> Follow </button>
+			                </div>
+			            </div>
+			            <div  class ="pgrid3" :id = "'followed'+user.user_id" style ="display: none">
+		                	<div class="spgrid1">
+			                    {{ posts }}
+			                </div>
+			                <div class="spgrid2">
+			                    {{ followers + 1}}                   
+			                </div>
+			                <div class="spgrid3">
+			                    Posts
+			                </div>
+			                <div class="spgrid4">
+			                    Followers 
+			                </div>
+		                	<div class="spgrid5">
+			                    <button v-on:click="follows(user.user_id,0)"> Following </button>
+			                </div>
+			            </div>	                
+	                </div>
+	                <div v-else-if= "user.followed==1">
+	                	<div class ="pgrid3" :id = "'sfollowed'+user.user_id">
+		                	<div class="spgrid1">
+			                    {{ posts }}
+			                </div>
+			                <div class="spgrid2">
+			                    {{ followers }}                   
+			                </div>
+			                <div class="spgrid3">
+			                    Posts
+			                </div>
+			                <div class="spgrid4">
+			                    Followers 
+			                </div>
+		                	<div class="spgrid5">
+			                    <button v-on:click="follows(user.user_id,1)"> Following </button>
+			                </div>
+			            </div>
+			            <div class ="pgrid3" :id = "'notfollowed'+user.user_id" style ="display: none">
+		                	<div class="spgrid1">
+			                    {{ posts }}
+			                </div>
+			                <div class="spgrid2">
+			                    {{ followers - 1}}                  
+			                </div>
+			                <div class="spgrid3">
+			                    Posts
+			                </div>
+			                <div class="spgrid4">
+			                    Followers 
+			                </div>
+		                	<div class="spgrid5">
+			                    <button v-on:click="follows(user.user_id,1)"> Follow </button>
+			                </div>
+			            </div>
+	                </div>
+	                <div v-else>
+	                	<div class ="pgrid3">
+		                	<div class="spgrid1">
+			                    {{ posts }}
+			                </div>
+			                <div class="spgrid2">
+			                    {{ followers }}                   
+			                </div>
+			                <div class="spgrid3">
+			                    Posts
+			                </div>
+			                <div class="spgrid4">
+			                    Followers 
+			                </div>
+		                </div>
+	                </div>
                 </div>
-                <div class="pgrid3-2">
-                    {{ followers }}                   
-                </div>
-                <div class="pgrid3-3">
-                    Posts
-                </div>
-                <div class="pgrid3-4">
-                    Followers 
-                </div>
-                <div class="pgrid4">
-                    <button>Follow</button>
-                </div>
+
+
+
+
+
+
+
+               
             </div>
             <ul id="userposts">
                 <li v-for= "i in photos.pics">
@@ -452,12 +534,25 @@ const Users     = Vue.component('users',{
             </ul>
         </div>
     `,
+    data: function(){
+        return{
+            user: [],
+            posts: 0,
+            followers: 0,
+            count:0,
+            photos: [],
+            uid:this.$route.params.user_id
+        };
+    },
     created:function(){
         if(barchan()!= true){
         	router.push({name: 'home'});
         }
+        chguserid(this.uid)
+        console.log(this.uid)
         let self = this;
-        fetch('/api/users/'.concat(user_id,'/posts'), {
+        fetch('/api/users/'+user_id+'/posts', {
+
             method: 'GET',
             headers:{
                 
@@ -480,15 +575,50 @@ const Users     = Vue.component('users',{
             console.log(error);
         });
 	},
-    data: function(){
-        return{
-            user: [],
-            posts: 0,
-            followers: 0,
-            count:0,
-            photos: []
-        };
-    },
+    methods:{
+    	follows:function (user_id,followed){
+    		
+			fetch('/api/users/'+user_id+'/follow',{
+                method: 'POST',
+                headers:{
+                    'X-CSRFToken': token,
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+
+                if (followed==0) {
+                	if (jsonResponse == 0) {
+                		$("#snotfollowed"+user_id.toString()).show();
+						$("#followed"+user_id.toString()).hide();
+					}else if (jsonResponse == 1) {
+                		$("#snotfollowed"+user_id.toString()).hide();
+						$("#followed"+user_id.toString()).show();
+					}
+				}else if (followed==1) {
+                	if (jsonResponse == 0) {
+                		$("#notfollowed"+user_id.toString()).show();
+						$("#sfollowed"+user_id.toString()).hide();
+					}else if (jsonResponse == 1) {
+                		$("#notfollowed"+user_id.toString()).hide();
+						$("#sfollowed"+user_id.toString()).show();
+					}
+				}
+		
+                
+                self.posts = jsonResponse.posts; 
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
+
 });
 
 const Posts     = Vue.component('posts',{
@@ -523,9 +653,9 @@ const Posts     = Vue.component('posts',{
         new_post: function(){
             let nPostForm = document.getElementById('nPostForm');
             let form_data = new FormData(nPostForm);
-            console.log("current user is ", user_id)
+            console.log("current user is ", cuser_id)
             if (user_id != null){
-                fetch('/api/users/'.concat(user_id,'/posts'), {
+                fetch('/api/users/'.concat(cuser_id,'/posts'), {
                     method: 'POST',
                     body: form_data,
                     headers:{
@@ -567,10 +697,14 @@ const Home = Vue.component('home', {
                 Share photo of your favorite moments with friends family and the world.
             </div>
             <div class="homegrid3">
-                <button class = "regbtn"> Register</button>
+            	<router-link id= "R" to="/register">
+            		<button class = "regbtn"> Register</button>
+            	</router-link>    
             </div>
-             <div class="homegrid3-2">
-                <button class="logbtn">Login</button>
+            <div class="homegrid3-2">
+             	<router-link id= "LI" to="/login">
+             		<button class="logbtn">Login</button>
+             	</router-link>	
             </div>
         </div>
    	 </div>
@@ -580,7 +714,7 @@ const Home = Vue.component('home', {
     }
     ,
     created:function(){
-        if(localStorage.getItem('token')!==null & localStorage.getItem('user_id')!==null){
+        if(localStorage.getItem('token')!==null & localStorage.getItem('cuser_id')!==null){
 
             barchan(); 
             router.push({name: 'explore'});
@@ -670,7 +804,7 @@ const router = new VueRouter({
         {path: "/login", component: Login , name: "login" },
         {path: "/logout", component: Logout, name: 'logout'},
         {path: "/explore", component: Explore, name: 'explore'},
-        {path: '/users/'.concat(localStorage.getItem('user_id')), component: Users, name:'user'},
+        {path: "/users/:user_id", component: Users, name:'user'},
         {path: "/posts/new", component: Posts, name:'new post'},
 
         // This is a catch all route in case none of the above matches

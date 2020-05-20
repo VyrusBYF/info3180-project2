@@ -80,5 +80,5 @@ class Follows (db.Model):
     __tablename__ = 'follows'
 
     id = db.Column(db.Integer, primary_key=True,unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)
-    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key = True, nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)

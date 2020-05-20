@@ -185,6 +185,13 @@ def userPosts(user_id):
         info = Posts.query.with_entities(Posts.photo).filter_by(user_id = user_id).all()
         post_count = Posts.query.filter_by(user_id = user_id).count()
         follow_count = Follows.query.filter_by(user_id = user_id).count()
+        print(str(g.current_user['user_id']) != str(user_id))
+        print(str(g.current_user['user_id']))
+        print(str(user_id))
+        if str(g.current_user['user_id']) != str(user_id):
+            followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
+        else:
+        	followed = 3
         details={}
         photos={'pics':[]}
         details['fname']=user[1]
@@ -193,6 +200,8 @@ def userPosts(user_id):
         details['location']= user[4]
         details['bio']=user[5]
         details['join_date']= "Member since " + str(user[6])
+        details['followed']= followed
+        details['user_id']= user_id
 
         for pic in info:
             photos['pics'].append("../static/uploads/" + str(pic[0]))
@@ -204,7 +213,7 @@ def userPosts(user_id):
 @requires_auth
 def posts():
     posts=[]
-    results=Posts.query.with_entities(Users.username, Users.pro_pic, Posts.photo, Posts.caption, Posts.created_on,Posts.id).join(Users, Users.id == Posts.user_id).all()
+    results=Posts.query.with_entities(Users.username, Users.pro_pic, Posts.photo, Posts.caption, Posts.created_on, Posts.id, Posts.user_id).join(Users, Users.id == Posts.user_id).all()
     #results = Posts.query.with_entities(Posts.user_id,Posts.photo, Posts.caption,Posts.created_on).all()
     for post in results:
        	lcount=Likes.query.filter_by(post_id=post[5]).count()
@@ -219,34 +228,49 @@ def posts():
        	temp['likes']    = lcount
        	temp['post_id']  = post[5]
        	temp['liked']    = liked
+       	temp['post_uid'] = post[6]
        	posts.append(temp)
-    return jsonify(posts = posts) 
+    users=Posts.query.with_entities(Users.id).all()
+    return jsonify(posts = posts, users = users) 
 
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @requires_auth
 def follow(user_id):
-	followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
-	success_msg=followed
-	return jsonify(success_msg)
+	if request.method == 'POST':
+		followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
+		if followed == 0:
+			db.session.add(Follows(user_id=user_id,follower_id=g.current_user['user_id']))
+			db.session.commit()
+			followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
+			print(followed)
+			success_msg=1
+		else:
+			Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).delete()
+			db.session.commit()
+			followed=Follows.query.filter_by(user_id=user_id,follower_id=g.current_user['user_id']).count()
+			print(followed)
+			success_msg=0
+		return jsonify(success_msg)
 
 
 @app.route('/api/posts/<post_id>/like', methods=['POST'])
 @requires_auth
 def like(post_id):
-	liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
-	if liked == 0:
-		db.session.add(Likes(post_id=post_id,user_id=g.current_user['user_id']))
-		db.session.commit()
+	if request.method == 'POST':
 		liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
-		print(liked)
-		success_msg=1
-	else:
-		liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).delete()
-		db.session.commit()
-		liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
-		print(liked)
-		success_msg=0
-	return jsonify(success_msg)
+		if liked == 0:
+			db.session.add(Likes(post_id=post_id,user_id=g.current_user['user_id']))
+			db.session.commit()
+			liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
+			print(liked)
+			success_msg=1
+		else:
+			Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).delete()
+			db.session.commit()
+			liked=Likes.query.filter_by(post_id=post_id,user_id=g.current_user['user_id']).count()
+			print(liked)
+			success_msg=0
+		return jsonify(success_msg)
 
 
 
