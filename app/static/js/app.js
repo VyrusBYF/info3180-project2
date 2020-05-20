@@ -107,7 +107,7 @@ const Register  = Vue.component('register',{
 	                <input name="photo" type = "file" id="photo" accept="image/png, image/jpeg" onchange="text()" hidden="hidden">
 	                <button type="button" id="mybtn" onclick = "change()">Browse</button><span id="filemsg"> No file Chosen...</span><br>
 
-	                <button type= "submit" id="submitbtn"> Submit </button>
+	                <button type= "submit" id="submitbtn"> Register </button>
 	            </form>
             </div>
         </div>

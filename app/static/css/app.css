@@ -18,13 +18,14 @@ label{
 
 
 #mybtn{
-	background-color: white;
-	color: black;
-	border-radius: 4px;
-	font-size: 14px;
-	border: solid #c8d6e5 1.7px;
-	font-family: Calibri;
-	transition-duration: 0.4s;
+    background-color: white;
+    color: black;
+    border-radius: 4px;
+    font-size: 14px;
+    border: solid #c8d6e5 1.7px;
+    font-family: Calibri;
+    transition-duration: 0.4s;
+    width: 30%;
 }
 
 #mybtn:hover{
@@ -35,10 +36,24 @@ label{
 #submitbtn{
 	margin-top: 17px;
 	color:white;
-	background-color:#1B9CFC;
+	background-color:#4AC948;
 	border-radius: 4px;
 	border: solid #c8d6e5 0.7px;
 	font-size: 14px;
+}
+
+#exbtn{
+    color:white;
+    background-color:#1B9CFC;
+    border-radius: 4px;
+    border: solid #c8d6e5 0.7px;
+    font-size: 12px;
+    width: 150px;
+    height: 22%;
+    font-family: Calibri;
+    font-size: 17px;
+    margin-right: 20px;
+    margin-left: 900px;
 }
 
 #filemsg{
@@ -139,6 +154,10 @@ button:focus, button:active:focus, button.active:focus {
 
 .liked{
 	color: red;
+}
+.like-button{
+    background-color: transparent;
+    border: none; 
 }
 
 ul{
