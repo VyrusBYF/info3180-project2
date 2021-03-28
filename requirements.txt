@@ -13,4 +13,4 @@ psycopg2
 # Production Server
 # ----------------------
 gunicorn
-pyjwt
+pyjwt == 1.7.1
